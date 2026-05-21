@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WbUsaLabelprintApplication {
+public class WbLabelprintApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(WbUsaLabelprintApplication.class, args);
+        SpringApplication.run(WbLabelprintApplication.class, args);
     }
 
 }
