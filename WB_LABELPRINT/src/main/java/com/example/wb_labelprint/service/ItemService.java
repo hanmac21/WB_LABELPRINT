@@ -53,6 +53,7 @@ public class ItemService implements ItemServiceImpl {
         int printQty = param.getPrintQty();
         int lotQty = param.getLotQty();
         String itemcode = param.getItemcode();
+        String spec = param.getSpec();
 
         // 00001 => 1
         int startLot = Integer.parseInt(param.getLotno());
@@ -60,7 +61,7 @@ public class ItemService implements ItemServiceImpl {
 
         for (int i = 0; i < printQty; i++){
             currentLot = startLot + i;
-            String barcode = String.join("_", day, month, year, itemcode,
+            String barcode = String.join("_", day, month, year, spec,
                     String.valueOf(lotQty), String.valueOf(currentLot));
 
             Map<String, Object> map = new HashMap<>();
@@ -73,7 +74,7 @@ public class ItemService implements ItemServiceImpl {
             map.put("factory", "WBTA");
             map.put("custname", param.getSupplier());
             map.put("lotno", currentLot);
-            map.put("spec", param.getSpec());
+            map.put("spec", spec);
 
             itemMapper.insertBarcode(map);
 
