@@ -266,16 +266,10 @@ $(document).ready(function () {
         const width = 900;
         const height = 800;
 
-        // 화면 중앙에 띄우기 위한 좌표 계산
-        const left = (screen.width - width) / 2;
-        const top = (screen.height - height) / 2;
-
         // 팝업 창 옵션
         const features = [
             `width=${width}`,
             `height=${height}`,
-            `left=${left}`,
-            `top=${top}`,
             'resizable=yes',
             'scrollbars=yes',
             'toolbar=no',
