@@ -79,7 +79,9 @@ $(document).ready(function () {
         const lotQty = parseInt($('#lotQty').val(), 10) || 0;
         const printQty = parseInt($('#printQty').val(), 10) || 0;
         const total = lotQty * printQty;
-        $('#totalQty').text(total);
+
+        // ★ 천 단위 콤마 포함해서 표시
+        $('#totalQty').text(total.toLocaleString('en-US'));
     }
 
     // ============ 검색 ============
@@ -218,7 +220,7 @@ $(document).ready(function () {
             lotno:     $('#lotno').val(),
             lotQty:    parseInt($('#lotQty').val(), 10),
             printQty:  parseInt($('#printQty').val(), 10),
-            totalQty:  parseInt($('#totalQty').text(), 10),
+            totalQty:  parseInt($('#totalQty').text().replace(/,/g, ''), 10),
             supplier:  $('#supplier').val()
         };
 
