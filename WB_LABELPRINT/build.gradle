@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'org.springframework.boot' version '4.0.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'WB_LABELPRINT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // MyBatis / Database
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.0.1'
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Development
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // WAR / Tomcat
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat-runtime'
+
+    // JasperReports
+    implementation 'net.sf.jasperreports:jasperreports:6.11.0'
+    implementation 'net.sf.barcode4j:barcode4j:2.1'
+    implementation 'com.google.zxing:core:3.4.1'
+    implementation 'org.apache.xmlgraphics:batik-bridge:1.14'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'commons-beanutils:commons-beanutils:1.9.4'
+    implementation 'net.sourceforge.barbecue:barbecue:1.5-beta1'
+    implementation 'com.lowagie:itext:2.1.7'
+
+    // font
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:4.0.1'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
