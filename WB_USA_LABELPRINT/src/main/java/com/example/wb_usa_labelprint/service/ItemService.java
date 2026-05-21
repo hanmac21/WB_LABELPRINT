@@ -13,15 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ItemService {
+public class ItemService implements ItemServiceImpl {
 
     @Autowired
     public ItemMapper itemMapper;
 
+    @Override
     public List<ItemVO> search(ItemVO itemVO) {
         return itemMapper.search(itemVO);
     }
 
+    @Override
     public String getNextLotNo(ItemVO param) {
         System.out.println(param);
         String maxLotno = itemMapper.getNextLotNo(param);
@@ -34,6 +36,7 @@ public class ItemService {
         return String.format("%05d", next);
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public List<String> createBarcodes(PrintVO param) {
         List<String> barcodeList = new ArrayList<>();
@@ -86,6 +89,7 @@ public class ItemService {
 
         itemMapper.mergeBarcodeMax(itemInfo);
 
-        return barcodeList;
+        throw new RuntimeException("롤백");
+//        return barcodeList;
     }
 }

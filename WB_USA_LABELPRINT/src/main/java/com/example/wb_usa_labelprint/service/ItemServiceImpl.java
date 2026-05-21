@@ -1,0 +1,14 @@
+package com.example.wb_usa_labelprint.service;
+
+import com.example.wb_usa_labelprint.vo.ItemVO;
+import com.example.wb_usa_labelprint.vo.PrintVO;
+
+import java.util.List;
+
+public interface ItemServiceImpl {
+    List<ItemVO> search(ItemVO itemVO);
+
+    String getNextLotNo(ItemVO param);
+
+    List<String> createBarcodes(PrintVO param);
+}
