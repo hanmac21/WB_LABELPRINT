@@ -3,7 +3,21 @@
 
 <mapper namespace="com.example.wb_labelprint.mapper.mex.ItemMexMapper">
     <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
-        SELECT 1 FROM DUAL WHERE 1=0
+        SELECT D.SUBNAME_CH AS CAR,ITEMCODE,SPEC,ITEMNAME,H.SUBNAME_CH AS UNIT
+        FROM T_MI_ITEM C
+        inner join t_mi_typesub d on c.carno = d.subcode and d.typecode = 'MI041'
+        left outer join t_mi_typesub H on c.cmb_UNIT = H.subcode and H.typecode = 'MI001'
+        WHERE DELDATE = ' '
+        <if test="itemcode != null and itemcode != ''">
+            AND UPPER(ITEMCODE) LIKE '%' || UPPER(#{itemcode}) || '%'
+        </if>
+        <if test="spec != null and spec != ''">
+            AND UPPER(SPEC) LIKE '%' || UPPER(#{spec}) || '%'
+        </if>
+        <if test="itemname != null and itemname != ''">
+            AND UPPER(ITEMNAME) LIKE '%' || UPPER(#{itemname}) || '%'
+        </if>
+        ORDER BY ITEMCODE
     </select>
 
     <select id="getNextLotNo" resultType="string">
