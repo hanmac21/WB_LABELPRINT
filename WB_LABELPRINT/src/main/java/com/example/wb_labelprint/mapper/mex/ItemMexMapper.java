@@ -1,4 +1,4 @@
-package com.example.wb_labelprint.mapper;
+package com.example.wb_labelprint.mapper.mex;
 
 import com.example.wb_labelprint.vo.ItemVO;
 import org.apache.ibatis.annotations.Mapper;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @Mapper
-public interface ItemMapper {
+public interface ItemMexMapper {
     List<ItemVO> search(ItemVO itemVO);
 
     String getNextLotNo(ItemVO param);

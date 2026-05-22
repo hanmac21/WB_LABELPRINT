@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.wb_labelprint.mapper.mex.ItemMexMapper">
+    <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
+        SELECT 1 FROM DUAL WHERE 1=0
+    </select>
+
+    <select id="getNextLotNo" resultType="string">
+        SELECT '00001' FROM DUAL
+    </select>
+
+    <insert id="insertBarcode" parameterType="map">
+        SELECT 1 FROM DUAL
+    </insert>
+
+    <update id="mergeBarcodeMax">
+        SELECT 1 FROM DUAL
+    </update>
+</mapper>

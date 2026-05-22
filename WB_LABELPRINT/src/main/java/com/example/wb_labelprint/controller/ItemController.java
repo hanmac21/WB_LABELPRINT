@@ -1,6 +1,6 @@
 package com.example.wb_labelprint.controller;
 
-import com.example.wb_labelprint.service.ItemService;
+import com.example.wb_labelprint.service.ItemServiceImpl;
 import com.example.wb_labelprint.vo.ItemVO;
 import com.example.wb_labelprint.vo.PrintVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 public class ItemController {
     @Autowired
-    public ItemService itemService;
+    public ItemServiceImpl itemService;
 
 
     @PostMapping("/items/search")

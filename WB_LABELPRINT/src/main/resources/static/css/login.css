@@ -59,3 +59,59 @@
 .btn-login:hover {
     background-color: #357ab8;
 }
+
+/* ============ Country Selection ============ */
+.country-options {
+    display: flex;
+    gap: 10px;
+}
+
+.country-option {
+    flex: 1;
+    cursor: pointer;
+    position: relative;
+}
+
+/* 라디오 버튼 숨김 */
+.country-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 카드 형태 라벨 */
+.country-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 10px;
+    border: 2px solid #d6dbe1;
+    border-radius: 8px;
+    background: #ffffff;
+    transition: all 0.15s;
+}
+
+.country-option:hover .country-label {
+    border-color: #b8c0ca;
+    background: #fafbfc;
+}
+
+/* 선택된 상태 */
+.country-option input[type="radio"]:checked + .country-label {
+    border-color: #1e6b3a;
+    background: #eaf5ee;
+    box-shadow: 0 0 0 3px rgba(30, 107, 58, 0.12);
+}
+
+.country-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: 1px;
+}
+
+.country-option input[type="radio"]:checked + .country-label .country-name {
+    color: #1e6b3a;
+}

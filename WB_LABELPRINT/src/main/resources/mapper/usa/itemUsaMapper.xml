@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.wb_labelprint.mapper.ItemMapper">
+<mapper namespace="com.example.wb_labelprint.mapper.usa.ItemUsaMapper">
     <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
         SELECT D.SUBNAME_CH AS CAR,ITEMCODE,SPEC,ITEMNAME,H.SUBNAME_CH AS UNIT
         FROM T_MI_ITEM C

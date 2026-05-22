@@ -11,6 +11,26 @@
     <div class="login-box">
         <h1>Label Print Program</h1>
         <form action="/main" method="post">
+
+            <!-- Country 선택 -->
+            <div class="form-group">
+                <label>Country</label>
+                <div class="country-options">
+                    <label class="country-option">
+                        <input type="radio" name="country" value="USA" checked>
+                        <span class="country-label">
+                            <span class="country-name">USA</span>
+                        </span>
+                    </label>
+                    <label class="country-option">
+                        <input type="radio" name="country" value="MEX">
+                        <span class="country-label">
+                            <span class="country-name">MEX</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="id">ID</label>
                 <input type="text" id="id" name="id" placeholder="Enter your id">
