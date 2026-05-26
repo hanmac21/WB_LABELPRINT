@@ -60,57 +60,30 @@
     background-color: #357ab8;
 }
 
-/* ============ Country Selection ============ */
-.country-options {
-    display: flex;
-    gap: 10px;
+/* ============ Remember ID ============ */
+.remember-group {
+    margin-top: -4px;
+    margin-bottom: 4px;
 }
 
-.country-option {
-    flex: 1;
-    cursor: pointer;
-    position: relative;
-}
-
-/* 라디오 버튼 숨김 */
-.country-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* 카드 형태 라벨 */
-.country-label {
-    display: flex;
-    flex-direction: column;
+.remember-label {
+    display: inline-flex !important;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 14px 10px;
-    border: 2px solid #d6dbe1;
-    border-radius: 8px;
-    background: #ffffff;
-    transition: all 0.15s;
-}
-
-.country-option:hover .country-label {
-    border-color: #b8c0ca;
-    background: #fafbfc;
-}
-
-/* 선택된 상태 */
-.country-option input[type="radio"]:checked + .country-label {
-    border-color: #1e6b3a;
-    background: #eaf5ee;
-}
-
-.country-name {
+    gap: 8px;
+    cursor: pointer;
     font-size: 13px;
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: 1px;
+    color: #6b7684;
+    margin-bottom: 0 !important;
+    user-select: none;
 }
 
-.country-option input[type="radio"]:checked + .country-label .country-name {
-    color: #1e6b3a;
+.remember-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #1e6b3a;
+}
+
+.remember-label:hover {
+    color: #2c3e50;
 }

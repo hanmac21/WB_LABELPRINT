@@ -10,30 +10,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MainController {
 
     @GetMapping("/")
-    public String root(){
-        return "redirect:/main";
+    public String root() {
+        return "redirect:/login";
     }
 
     @GetMapping("/login")
-    public String login(){
-        return "login";
-    }
-
-    @PostMapping("/main")
-    public String loginToMain(@RequestParam(required = false) String country, HttpSession session) {
-
-        // country 가 있으면 세션에 저장 (없으면 기본 USA)
-        if (country != null && !country.isBlank()) {
-            session.setAttribute("country", country);
-        } else {
-            session.setAttribute("country", "USA");
-        }
-
-        return "redirect:/main";
+    public String login() {
+        return "forward:/login.html";
     }
 
     @GetMapping("/main")
     public String main() {
-        return "main";
+        return "forward:/main.html";
     }
 }

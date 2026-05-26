@@ -22,7 +22,6 @@ repositories {
 dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // MyBatis / Database
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.0.1'
