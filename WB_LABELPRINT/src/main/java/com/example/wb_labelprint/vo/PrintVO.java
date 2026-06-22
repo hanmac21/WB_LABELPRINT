@@ -21,6 +21,9 @@ public class PrintVO {
     private int totalQty;
     private String supplier;
 
+    // 바코드 타입
+    private String guide;
+
     // 라벨 출력 시 전달되는 바코드 리스트
     private List<String> barcodes;
 }

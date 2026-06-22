@@ -1,7 +1,7 @@
-package com.example.wb_labelprint.mapper.mex;
+package com.example.wb_labelprint.mapper.kor;
 
 import com.example.wb_labelprint.mapper.ItemMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface ItemMexMapper extends ItemMapper { }
+public interface ItemKorMapper extends ItemMapper { }

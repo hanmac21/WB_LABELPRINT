@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan({
-    "com.example.wb_labelprint.mapper.usa",
-    "com.example.wb_labelprint.mapper.mex"
+    "com.example.wb_labelprint.mapper"
 })
 public class WbLabelprintApplication {
 

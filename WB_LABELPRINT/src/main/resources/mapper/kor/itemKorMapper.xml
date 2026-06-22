@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.wb_labelprint.mapper.mex.ItemMexMapper">
+<mapper namespace="com.example.wb_labelprint.mapper.kor.ItemKorMapper">
     <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
-        SELECT D.SUBNAME_CH AS CAR,ITEMCODE,SPEC,ITEMNAME,H.SUBNAME_CH AS UNIT
+        SELECT D.SUBNAME AS CAR,ITEMCODE,SPEC,ITEMNAME,H.SUBNAME AS UNIT
         FROM T_MI_ITEM C
         inner join t_mi_typesub d on c.carno = d.subcode and d.typecode = 'MI041'
         left outer join t_mi_typesub H on c.cmb_UNIT = H.subcode and H.typecode = 'MI001'
@@ -23,8 +23,7 @@
     <select id="getNextLotNo" resultType="string">
         SELECT BARCODE
         FROM T_SCM_BARCODE_MAX
-        WHERE MADATE = #{date}
-        AND PNO = #{itemcode}
+        WHERE INDATE = REPLACE(SUBSTR(#{date}, 3), '-', '')
     </select>
 
     <insert id="insertBarcode" parameterType="map">

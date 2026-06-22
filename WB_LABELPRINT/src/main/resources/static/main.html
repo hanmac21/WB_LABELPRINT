@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <title>Label Print Program</title>
     <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/modal.css">
     <link rel="stylesheet" href="/css/main.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/js/modal.js"></script>
+    <script src="/js/main.js"></script>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-    </div>
-
     <!-- Search / Filter Panel -->
     <section class="filter-panel">
         <div class="filter-row">
@@ -80,16 +78,18 @@
             <div class="guide-area">
                 <div class="guide-text">
                     <div>ADD DOCUMENT GUIDE</div>
-                    <div>OFF : NONE</div>
-                    <div>PALLET : MATERIAL</div>
-                    <div>BOX : PRODUCT(ASSY)</div>
+                    <div class="guide-line" data-option="OFF">OFF : NONE</div>
+                    <div class="guide-line" data-option="PALLET">PALLET : MATERIAL</div>
+                    <div class="guide-line" data-option="BOX">BOX : PRODUCT(ASSY)</div>
+                    <div class="guide-example" id="guideExample"></div>
                 </div>
                 <select class="guide-select" id="guideOption">
                     <option>OFF</option>
+                    <option>PALLET</option>
+                    <option>BOX</option>
                 </select>
-                <button class="btn-settings" aria-label="Settings">⚙</button>
             </div>
-
+            <button class="btn-settings" aria-label="Settings">⚙</button>
         </div>
     </section>
 
@@ -114,6 +114,9 @@
         </div>
     </section>
 
-    <script src="/js/main.js"></script>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
 </body>
 </html>

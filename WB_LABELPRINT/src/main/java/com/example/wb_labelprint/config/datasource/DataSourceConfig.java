@@ -33,6 +33,13 @@ public class DataSourceConfig {
     public DataSource mexDataSource(){
         return DataSourceBuilder.create().build();
     }
+    
+    // KOR(PT) DB
+    @Bean(name = "korDataSource")
+    @ConfigurationProperties(prefix = "datasource.kor")
+    public DataSource korDataSource(){
+        return DataSourceBuilder.create().build();
+    }
 
     // 두 DataSource를 묶는 라우팅 DataSource (실제로 사용되는 메인
     @Bean(name = "routingDataSource")
@@ -43,6 +50,7 @@ public class DataSourceConfig {
         Map<Object, Object> targetDataSources = new HashMap<>();
         targetDataSources.put(DbType.USA, usaDataSource());
         targetDataSources.put(DbType.MEX, mexDataSource());
+        targetDataSources.put(DbType.PT, korDataSource());
 
         routingDataSource.setTargetDataSources(targetDataSources);
         routingDataSource.setDefaultTargetDataSource(usaDataSource());          // 기본값

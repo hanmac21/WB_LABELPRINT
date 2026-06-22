@@ -2,11 +2,12 @@ package com.example.wb_labelprint.service;
 
 import com.example.wb_labelprint.config.datasource.DbContextHolder;
 import com.example.wb_labelprint.config.datasource.DbType;
+import com.example.wb_labelprint.mapper.ItemMapper;
+import com.example.wb_labelprint.mapper.kor.ItemKorMapper;
 import com.example.wb_labelprint.mapper.mex.ItemMexMapper;
 import com.example.wb_labelprint.mapper.usa.ItemUsaMapper;
 import com.example.wb_labelprint.vo.ItemVO;
 import com.example.wb_labelprint.vo.PrintVO;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,29 +16,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.BooleanUtils.OFF;
+
 @Service
-@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemUsaMapper itemUsaMapper;
-    private final ItemMexMapper itemMexMapper;
+    private final Map<DbType, ItemMapper> mapperRegistry;
 
-    private boolean isMex() {
-        return DbContextHolder.get() == DbType.MEX;
+    public ItemServiceImpl(ItemUsaMapper usaMapper, ItemMexMapper mexMapper, ItemKorMapper korMapper) {
+        this.mapperRegistry = Map.of(
+                DbType.USA, usaMapper,
+                DbType.MEX, mexMapper,
+                DbType.PT, korMapper
+        );
+    }
+
+    // 현재 컨텍스트에 맞는 Mapper 반환
+    private ItemMapper mapper() {
+        DbType type = DbContextHolder.get();
+        ItemMapper m = mapperRegistry.get(type);
+        if (m == null) {
+            throw new IllegalStateException("지원하지 않는 DbType: " + type);
+        }
+        return m;
     }
 
     @Override
     public List<ItemVO> search(ItemVO itemVO) {
-        if (isMex()){
-            return itemMexMapper.search(itemVO);
-        }
-        return itemUsaMapper.search(itemVO);
+        return mapper().search(itemVO);
     }
 
     @Override
     public String getNextLotNo(ItemVO param) {
         System.out.println(param);
-        String maxLotno = isMex() ? itemMexMapper.getNextLotNo(param) : itemUsaMapper.getNextLotNo(param);
+        String maxLotno = mapper().getNextLotNo(param);
 
         if (maxLotno == null || maxLotno.isBlank()){
             return "00001";
@@ -50,11 +62,28 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<String> createBarcodes(PrintVO param) {
-        List<String> barcodeList = new ArrayList<>();
+        ItemMapper mapper = mapper();
 
         System.out.println("바코드 생성");
         System.out.println(param);
 
+        String guide = param.getGuide();
+
+        switch(guide) {
+            case "OFF":
+                return createPart(param, mapper);
+            case "PALLET":
+                return createPallet(param, mapper);
+            case "BOX":
+                return createBox(param, mapper);
+            default:
+                throw new IllegalStateException("지원하지 않는 바코드 양식: " + guide);
+        }
+    }
+
+    // OFF : 파트라벨 생성
+    private List<String> createPart(PrintVO param, ItemMapper mapper) {
+        List<String> barcodeList = new ArrayList<>();
         // 날짜 추출
         String[] dateParts = param.getLotDate().split("-");
         String year = dateParts[0];
@@ -69,9 +98,6 @@ public class ItemServiceImpl implements ItemService {
         // 00001 => 1
         int startLot = Integer.parseInt(param.getLotno());
         int currentLot = 0;
-
-    // 현재 요청에 사용할 Mapper 한 번만 판별
-        boolean mex = isMex();
 
         for (int i = 0; i < printQty; i++){
             currentLot = startLot + i;
@@ -90,12 +116,7 @@ public class ItemServiceImpl implements ItemService {
             map.put("lotno", currentLot);
             map.put("spec", spec);
 
-            if (mex) {
-                itemMexMapper.insertBarcode(map);
-            } else {
-                itemUsaMapper.insertBarcode(map);
-            }
-
+            mapper.insertBarcode(map);
             barcodeList.add(barcode);
         }
 
@@ -106,12 +127,30 @@ public class ItemServiceImpl implements ItemService {
         itemInfo.put("lotno", currentLot);
         itemInfo.put("sdate", param.getLotDate());
 
-        if (mex) {
-            itemMexMapper.mergeBarcodeMax(itemInfo);
-        } else {
-            itemUsaMapper.mergeBarcodeMax(itemInfo);
-        }
+        mapper.mergeBarcodeMax(itemInfo);
 
+        return barcodeList;
+    }
+
+
+    // PALLET : 팔레트 라벨 생성
+    private List<String> createPallet(PrintVO param, ItemMapper mapper) {
+        List<String> barcodeList = createPart(param, mapper);   // 기존 처리 재사용
+
+        //A001252110101,260422,00004,00001.00,WMSUSA
+        //A001252110101,260422,00003,00001.00,WMSUSA
+        //A001252110101,260422,00002,00001.00,WMSUSA
+        //A001252110101,260422,00001,00001.00,WMSUSA
+
+
+
+        return barcodeList;
+    }
+
+    // BOX : 박스 라벨 생성
+    private List<String> createBox(PrintVO param, ItemMapper mapper) {
+        List<String> barcodeList = new ArrayList<>();
+        // BOX 전용 로직
         return barcodeList;
     }
 }

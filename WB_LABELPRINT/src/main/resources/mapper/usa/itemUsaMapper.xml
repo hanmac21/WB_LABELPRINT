@@ -21,10 +21,10 @@
     </select>
 
     <select id="getNextLotNo" resultType="string">
-        select barcode
-        from t_scm_barcode_max
-        where sdate = #{date}
-        and itemcode = #{itemcode}
+        SELECT BARCODE
+        FROM T_SCM_BARCODE_MAX
+        WHERE SDATE = #{date}
+        AND ITEMCODE = #{itemcode}
     </select>
 
     <insert id="insertBarcode" parameterType="map">

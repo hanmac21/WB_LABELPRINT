@@ -1,0 +1,128 @@
+/* ============ Custom Modal (alert/confirm) ============ */
+.cmodal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+}
+
+.cmodal-overlay.active {
+    display: flex;
+}
+
+.cmodal-box {
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: cmodal-pop 0.15s ease-out;
+}
+
+@keyframes cmodal-pop {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.cmodal-header {
+    background: #1f3a5f;
+    color: #ffffff;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.cmodal-body {
+    padding: 20px;
+}
+
+/* 텍스트 메시지일 때(alert/confirm 기본) */
+.cmodal-body.cmodal-text {
+    padding: 24px 20px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.6;
+    color: #2c3e50;
+    text-align: center;
+    white-space: pre-line;
+}
+
+.cmodal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-top: 1px solid #eef0f3;
+}
+
+.cmodal-btn {
+    flex: 1;
+    height: 42px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.05s;
+}
+
+.cmodal-btn:active {
+    transform: translateY(1px);
+}
+
+.cmodal-cancel {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.cmodal-cancel:hover {
+    background: #dde1e6;
+}
+
+.cmodal-confirm {
+    background: #d93838;
+    color: #ffffff;
+}
+
+.cmodal-confirm:hover {
+    background: #b82e2e;
+}
+
+/* 발행 확인 표 (html 옵션으로 넣는 내용) */
+.cmodal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.cmodal-table th,
+.cmodal-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #eef0f3;
+    text-align: left;
+}
+
+.cmodal-table tr:last-child th,
+.cmodal-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cmodal-table th {
+    width: 110px;
+    color: #6b7684;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.cmodal-table td {
+    color: #2c3e50;
+    font-weight: 700;
+}
