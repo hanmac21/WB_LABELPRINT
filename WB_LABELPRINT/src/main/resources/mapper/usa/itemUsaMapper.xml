@@ -98,4 +98,53 @@
                 B.LOTNO
             )
     </update>
+
+    <!-- 해당 날짜에 있는 최신 팔레트 바코드 가져오기 -->
+    <select id="selectPalletSeq" resultType="string">
+        SELECT PBARCODE
+        FROM T_SCM_PALLET
+        WHERE SDATE = #{date}
+        ORDER BY PBARCODE DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <insert id="insertPalletBarcode">
+        INSERT INTO T_SCM_PALLET (
+            PBARCODE,
+            SDATE,
+            BBARCODE,
+            YMDHMS,
+            LOGINID,
+            ITEMCODE,
+            CUSTCODE,
+            CUSTNAME,
+            BDATE,
+            SEQ,
+            QTY,
+            SCMMEX,
+            LABELTYPE,
+            LASTSTATUS,
+            LASTFACTORY,
+            FACTORY,
+            LASTQTY
+        ) VALUES (
+            #{pbarcode},
+            #{sdate},
+            #{barcode},
+            TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
+            #{loginid},
+            #{itemcode},
+            #{custcode},
+            #{custname},
+            #{bdate},
+            #{seq},
+            #{qty},
+            #{scmmex},
+            #{labelType},
+            #{laststatus},
+            #{factory},
+            #{factory},
+            #{qty}
+        )
+    </insert>
 </mapper>

@@ -5,6 +5,7 @@
 const Modal = (function () {
 
     let $overlay, $box, $header, $body, $footer;
+    let onBackdrop = null;   // 배경 클릭 시 실행할 동작
 
     // 모달 DOM을 처음 한 번만 생성
     function ensureDom() {
@@ -19,6 +20,13 @@ const Modal = (function () {
         $box.append($header).append($body).append($footer);
         $overlay.append($box);
         $('body').append($overlay);
+
+        // 배경(오버레이) 빈 곳 클릭 시 닫기
+        $overlay.on('click', function (e) {
+            if (e.target === $overlay[0] && typeof onBackdrop === 'function') {
+                onBackdrop();
+            }
+        });
     }
 
     function open() {
@@ -57,12 +65,13 @@ const Modal = (function () {
             setBody(options);
             $footer.empty();
 
+            const done = function () { close(); resolve(); };
+
+            onBackdrop = done;   // 배경 클릭 → OK와 동일하게 닫기
+
             const $ok = $('<button class="cmodal-btn cmodal-confirm"></button>')
                 .text(options.okText || 'OK')
-                .on('click', function () {
-                    close();
-                    resolve();
-                });
+                .on('click', done);
 
             $footer.append($ok);
             open();
@@ -76,6 +85,7 @@ const Modal = (function () {
         ensureDom();
 
         return new Promise(function (resolve) {
+            onBackdrop = null;   // confirm은 배경 클릭 무시 (이전 alert 설정 초기화)
             setHeader(options.title);
             setBody(options);
             $footer.empty();

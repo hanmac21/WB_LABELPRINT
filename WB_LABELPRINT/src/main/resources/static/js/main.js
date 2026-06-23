@@ -51,11 +51,11 @@ function bindEvents() {
 
     // LOT DATE 변경 시 선택된 행 기준으로 LOTNO 재조회
     $('#lotDate').on('change', function () {
-        const $selectedRow = $('.data-table tr.row-selected');
-        if ($selectedRow.length === 0) {
+        const row = $('.data-table tr.row-selected');
+        if (row.length === 0) {
             return;  // 선택된 행 없으면 아무것도 안 함
         }
-        fetchLotno($selectedRow.find('.col-itemcode').text());
+        fetchLotno(row.find('.col-itemcode').text());
     });
 
     // LOT QTY / PRINT QTY — 입력 중 실시간 계산
@@ -84,6 +84,9 @@ function bindEvents() {
         setCookie('guideOption', $(this).val());
         updateGuideHighlight();
     });
+
+    // 출력 창 닫기 모달
+    $('#printModalClose').on('click', closePrintModal);
 }
 
 
@@ -187,6 +190,12 @@ function fetchLotno(itemcode) {
     });
 }
 
+// 선택된 품번 기준으로 lotno 다시 조회
+function refreshLotno() {
+    const row = $('.data-table tr.row-selected');
+    if (row.length === 0) return;
+    fetchLotno(row.find('.col-itemcode').text());
+}
 
 /* =====================================================
  * QTY — 수량 계산 / 검증
@@ -223,8 +232,8 @@ function validateQty($input, min, max) {
 // 가이드별 바코드 양식 (고정 텍스트 — 실제 값 아님, 생성 형식 안내)
 const GUIDE_FORMATS = {
     OFF:    'ITEMCODE,YYMMDD,LOTNO,LOTQTY,WMSUSA',
-    PALLET: 'P+SERIAL,CUSTCODE,TOTALQTY,WMSUSA',
-    BOX:    'DD_MM_YYYY_CUSTCODE_LOTQTY_LOTNO'
+    PALLET: 'P+SERIAL,CUSTOMERCODE,TOTALQTY,WMSUSA',
+    BOX:    'DD_MM_YYYY_CUSTOMERCODE_LOTQTY_LOTNO'
 };
 
 function updateGuideHighlight() {
@@ -242,31 +251,35 @@ function updateGuideHighlight() {
  * PRINT — 라벨 발행
  * ===================================================== */
 async function print() {
-    const $selectedRow = $('.data-table tr.row-selected');
+    const row = $('.data-table tr.row-selected');
 
-    if ($selectedRow.length === 0) {
+    if (row.length === 0) {
         Modal.alert('Please select an item from the table.');
         return;
     }
 
     const printData = {
-        car:       $selectedRow.find('.col-car').text(),
-        itemcode:  $selectedRow.find('.col-itemcode').text(),
-        itemname:  $selectedRow.find('.col-itemname').text(),
-        unit:      $selectedRow.find('.col-unit').text(),
-        spec:      $selectedRow.find('.col-spec').text(),
+        // 기본 정보
+        car:       row.find('.col-car').text(),
+        itemcode:  row.find('.col-itemcode').text(),
+        itemname:  row.find('.col-itemname').text(),
+        unit:      row.find('.col-unit').text(),
+        spec:      row.find('.col-spec').text(),
 
+        // 추가 정보
         lotDate:   $('#lotDate').val(),
         lotno:     $('#lotno').val(),
         lotQty:    parseInt($('#lotQty').val(), 10),
         printQty:  parseInt($('#printQty').val(), 10),
         totalQty:  parseInt($('#totalQty').text().replace(/,/g, ''), 10),
         supplier:  $('#supplier').val(),
+
+        // 바코드 타입
         guide:     $('#guideOption').val()
     };
 
     // 확인 모달용 표 HTML
-    const rows = [
+    const data = [
         ['ITEM CODE', printData.itemcode],
         ['ITEM NAME', printData.itemname],
         ['LOT DATE',  printData.lotDate],
@@ -279,7 +292,7 @@ async function print() {
 
     const tableHtml =
         '<table class="cmodal-table">' +
-        rows.map(function (r) {
+        data.map(function (r) {
             return '<tr><th>' + r[0] + '</th><td>' + escapeHtml(r[1]) + '</td></tr>';
         }).join('') +
         '</table>';
@@ -295,11 +308,8 @@ async function print() {
 
     doPrint(printData);
 }
-
 function doPrint(printData) {
     if (!printData) return;
-
-    console.log('Print data:', printData);
 
     showLoading();
 
@@ -309,9 +319,9 @@ function doPrint(printData) {
         contentType: 'application/json',
         data: JSON.stringify(printData),
         dataType: 'json',
-        success: function (barcodes) {
-            console.log('Barcodes created:', barcodes);
-            openLabelPdf(barcodes, printData);
+        success: function (result) {
+            console.log('Barcodes created:', result);
+            openPrintModal(result, printData);   // 출력은 모달에서
         },
         error: function (xhr, status, error) {
             console.error('Barcode create failed:', status, error, xhr.responseText);
@@ -321,21 +331,44 @@ function doPrint(printData) {
     });
 }
 
-// PDF 새 탭(팝업)에서 열기
-function openLabelPdf(barcodes, printData) {
+// 출력 모달 열기
+function openPrintModal(result, printData) {
+    const items = [];
+    if (result.part)   items.push({ label: 'PRINT PART LABEL',   barcodes: result.part,   type: 'part' });
+    if (result.pallet) items.push({ label: 'PRINT PALLET LABEL', barcodes: result.pallet, type: 'pallet' });
+    if (result.box)    items.push({ label: 'PRINT BOX LABEL',    barcodes: result.box,    type: 'box' });
+
+    const $buttons = $('#printModalButtons');
+    $buttons.empty();
+
+    items.forEach(function (item) {
+        const $btn = $('<button class="print-modal-btn print-label-btn"></button>')
+            .text(item.label)
+            .on('click', function () {
+                // 사용자 클릭에서 바로 window.open → 팝업 차단 안 됨
+                openLabelPdf(item.barcodes, printData, item.type);
+                // 출력 완료 표시
+                $btn.addClass('printed').prop('disabled', false);
+            });
+        $buttons.append($btn);
+    });
+
+    $('#printModal').addClass('active');
+}
+
+// PDF 새 창에서 열기
+function openLabelPdf(barcodes, printData, type) {
     const params = new URLSearchParams({
         barcodes: barcodes.join(';'),
-        qty: printData.lotQty
+        qty: printData.lotQty,
+        type: type
     });
 
     const url = '/label/print?' + params.toString();
 
-    const width = 900;
-    const height = 800;
-
     const features = [
-        `width=${width}`,
-        `height=${height}`,
+        'width=900',
+        'height=800',
         'resizable=yes',
         'scrollbars=yes',
         'toolbar=no',
@@ -344,9 +377,33 @@ function openLabelPdf(barcodes, printData) {
         'status=no'
     ].join(',');
 
-    window.open(url, 'labelPreview', features);
+    // 창 이름을 type별로 다르게 → 파트/팔레트가 서로 다른 창에 뜸
+    window.open(url, 'labelPreview_' + type, features);
 }
 
+// 출력 모달 닫기 — 미출력 안내
+function closePrintModal() {
+    // 아직 안 누른 출력 버튼이 있는지 확인
+    const $notPrinted = $('#printModalButtons .print-label-btn').not('.printed');
+
+    if ($notPrinted.length > 0) {
+        Modal.confirm({
+            title: 'UNPRINTED LABELS',
+            message: 'Some labels have not been printed yet.\nClose anyway?',
+            okText: 'CLOSE',
+            cancelText: 'CANCEL'
+        }).then(function (ok) {
+            if (ok) {
+                $('#printModal').removeClass('active');
+                refreshLotno();   // ← 닫은 뒤 lotno 재조회
+            }
+        });
+        return;
+    }
+
+    $('#printModal').removeClass('active');
+    refreshLotno();   // ← 닫은 뒤 lotno 재조회
+}
 
 /* =====================================================
  * LOADING — 로딩 오버레이

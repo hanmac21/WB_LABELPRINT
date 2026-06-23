@@ -11,10 +11,7 @@ import com.example.wb_labelprint.vo.PrintVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.BooleanUtils.OFF;
 
@@ -61,24 +58,30 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<String> createBarcodes(PrintVO param) {
+    public Map<String, List<String>> createBarcodes(PrintVO param) {
         ItemMapper mapper = mapper();
-
-        System.out.println("바코드 생성");
-        System.out.println(param);
-
         String guide = param.getGuide();
 
-        switch(guide) {
+        Map<String, List<String>> result = new LinkedHashMap<>();
+
+        switch (guide) {
             case "OFF":
-                return createPart(param, mapper);
-            case "PALLET":
-                return createPallet(param, mapper);
+                result.put("part", createPart(param, mapper));
+                break;
+            case "PALLET": {
+                List<String> partBarcodes = createPart(param, mapper);
+                result.put("part", partBarcodes);
+                result.put("pallet", createPallet(param, mapper, partBarcodes));
+                break;
+            }
             case "BOX":
-                return createBox(param, mapper);
+                result.put("box", createPart(param, mapper));
+                break;
             default:
                 throw new IllegalStateException("지원하지 않는 바코드 양식: " + guide);
         }
+
+        return result;
     }
 
     // OFF : 파트라벨 생성
@@ -134,17 +137,56 @@ public class ItemServiceImpl implements ItemService {
 
 
     // PALLET : 팔레트 라벨 생성
-    private List<String> createPallet(PrintVO param, ItemMapper mapper) {
-        List<String> barcodeList = createPart(param, mapper);   // 기존 처리 재사용
+    private List<String> createPallet(PrintVO param, ItemMapper mapper, List<String> partBarcodes) {
+        String date = param.getLotDate();
+        String bdate = date.replace("-", "").substring(2);
+        String itemcode = param.getItemcode();
+        String custname = param.getSupplier();
+        String qty = String.valueOf(param.getLotQty());
+        double totalqty = param.getTotalQty();
 
-        //A001252110101,260422,00004,00001.00,WMSUSA
-        //A001252110101,260422,00003,00001.00,WMSUSA
-        //A001252110101,260422,00002,00001.00,WMSUSA
-        //A001252110101,260422,00001,00001.00,WMSUSA
+        String lastPalletBarcode = mapper.selectPalletSeq(date);
+        int palletSeq = 0;
+        if (lastPalletBarcode != null && !lastPalletBarcode.isBlank()) {
+            String[] barcodeParts = lastPalletBarcode.split(",");
+            if (barcodeParts.length == 4) {
+                String palletNo = barcodeParts[0];
+                palletSeq = Integer.parseInt(palletNo.substring(palletNo.length() - 5));
+            }
+        }
+        palletSeq++;
+
+        String pbarcode = "P" + date.replace("-", "").substring(2)
+                + String.format("%05d", palletSeq) + ","
+                + itemcode + "," + String.format("%08.2f", totalqty) + ",WMSUSA";
 
 
+        for (String barcode : partBarcodes) {   // 넘겨받은 파트라벨 사용
+            String barcodeSeq = barcode.split("_")[5];
 
-        return barcodeList;
+            Map<String, Object> map = new HashMap<>();
+            map.put("pbarcode", pbarcode);
+            map.put("barcode", barcode);
+            map.put("loginid", "woobo");
+            map.put("seq", barcodeSeq);
+            map.put("sdate", date);
+            map.put("bdate", bdate);
+            map.put("itemcode", itemcode);
+            map.put("custcode", "A021");
+            map.put("custname", custname);
+            map.put("qty", qty);
+            map.put("scmmex", "WMSUSA");
+            map.put("labelType", "EXCEPTIONIN");
+            map.put("factory", "WBTA");
+            map.put("laststatus", "1");
+
+            mapper.insertPalletBarcode(map);
+        }
+
+        // 팔레트 바코드 하나만 리스트로 반환
+        List<String> palletList = new ArrayList<>();
+        palletList.add(pbarcode);
+        return palletList;
     }
 
     // BOX : 박스 라벨 생성

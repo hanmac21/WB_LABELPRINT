@@ -6,7 +6,7 @@
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 10001;
+    z-index: 10003;
 }
 
 .cmodal-overlay.active {
@@ -125,4 +125,233 @@
 .cmodal-table td {
     color: #2c3e50;
     font-weight: 700;
+}
+
+
+/* ============ Confirm Modal ============ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    width: 380px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: modal-pop 0.15s ease-out;
+}
+
+@keyframes modal-pop {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+    background: #1f3a5f;
+    color: #ffffff;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.modal-table th,
+.modal-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #eef0f3;
+    text-align: left;
+}
+
+.modal-table tr:last-child th,
+.modal-table tr:last-child td {
+    border-bottom: none;
+}
+
+.modal-table th {
+    width: 110px;
+    color: #6b7684;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.modal-table td {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-top: 1px solid #eef0f3;
+}
+
+.modal-btn {
+    flex: 1;
+    height: 42px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.05s;
+}
+
+.modal-btn:active {
+    transform: translateY(1px);
+}
+
+.modal-cancel {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.modal-cancel:hover {
+    background: #dde1e6;
+}
+
+.modal-confirm {
+    background: #d93838;
+    color: #ffffff;
+}
+
+.modal-confirm:hover {
+    background: #b82e2e;
+}
+
+
+/* ============ PRINT MODAL ============ */
+.print-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002;
+}
+
+.print-modal-overlay.active {
+    display: flex;
+}
+
+.print-modal-box {
+    width: 360px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.print-modal-header {
+    background: #1f3a5f;
+    color: #ffffff;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.print-modal-body {
+    padding: 20px;
+}
+
+.print-modal-guide {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #6b7684;
+    text-align: center;
+}
+
+.print-modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.print-modal-btn {
+    height: 46px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.15s, transform 0.05s;
+}
+
+.print-modal-btn:active {
+    transform: translateY(1px);
+}
+
+/* 출력 버튼 */
+.print-label-btn {
+    background: #1e6b3a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.print-label-btn:hover {
+    background: #175a30;
+}
+
+/* 출력 완료된 버튼 */
+.print-label-btn.printed {
+    background: #e9ecef;
+    color: #6b7684;
+}
+
+.print-label-btn.printed::after {
+    content: '✓ PRINTED';
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.print-modal-footer {
+    display: flex;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-top: 1px solid #eef0f3;
+}
+
+.print-modal-close {
+    flex: 1;
+    background: #e9ecef;
+    color: #495057;
+}
+
+.print-modal-close:hover {
+    background: #dde1e6;
 }

@@ -10,4 +10,8 @@ public interface ItemMapper {
     String getNextLotNo(ItemVO param);
     void insertBarcode(Map<String, Object> map);
     void mergeBarcodeMax(Map<String, Object> itemInfo);
+
+    String selectPalletSeq(String date);
+
+    void insertPalletBarcode(Map<String, Object> map);
 }

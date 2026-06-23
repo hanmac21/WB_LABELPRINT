@@ -34,21 +34,34 @@ public class ItemController {
     }
 
     @PostMapping("/barcode/create")
-    public List<String> createBarcodes(@RequestBody PrintVO param){
+    public Map<String, List<String>> createBarcodes(@RequestBody PrintVO param){
         return itemService.createBarcodes(param);
     }
 
     @GetMapping("/label/print")
     @ResponseBody
-    public void labelPrint(HttpServletResponse response, HttpServletRequest request, @RequestParam Map<String, String> param) {
-        // 파일 있는 곳에 pdf 파일 만들어줌
-        String templatePath = "";
-        String destPath = "";
-        templatePath = "C:/reportUSA/WB_Label_10x8.jrxml";
-        destPath = "/reportUSA/WB_Label_10x8.pdf";
-        System.out.println("templatePath : "+templatePath);
+    public void labelPrint(HttpServletResponse response, HttpServletRequest request,
+                           @RequestParam Map<String, String> param) {
 
-        // 바코드 파라미터 파싱
+        // 라벨 양식 종류 (part / pallet / box)
+        String type = param.getOrDefault("type", "part");
+
+        // 종류별 템플릿 선택
+        String templatePath;
+        switch (type) {
+            case "pallet":
+                templatePath = "C:/reportILPS/WB_Label_Pallet.jrxml";   // 팔레트 양식
+                break;
+            case "box":
+                templatePath = "C:/reportILPS/WB_Label_Boxlabel.jrxml";      // 박스 양식
+                break;
+            case "part":
+            default:
+                templatePath = "C:/reportILPS/WB_Label_10x8.jrxml";     // 기존 파트 양식
+                break;
+        }
+        System.out.println("type : " + type + ", templatePath : " + templatePath);
+
         String barcodesRaw = param.get("barcodes");
         if (barcodesRaw == null || barcodesRaw.isBlank()) {
             try {
@@ -63,16 +76,14 @@ public class ItemController {
 
         Connection conn = null;
         try {
-            // jrxml → JasperReport 컴파일
             JasperReport jasperReport = JasperCompileManager.compileReport(templatePath);
 
-            // Jasper에 전달할 파라미터
             Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("barcode", barcodeForSql);
-            // paramMap.put("qmemo", URLDecoder.decode(qmemo, "utf-8"));
-
-            System.out.println("@@@@@@@@@@여기@@@@@@@@@@@@@");
-            System.out.println(paramMap.toString());
+            if ("pallet".equals(type)) {
+                paramMap.put("pbarcode", barcodeForSql);
+            } else {
+                paramMap.put("barcode", barcodeForSql);
+            }
 
             Class.forName("oracle.jdbc.driver.OracleDriver");
             conn = DriverManager.getConnection("jdbc:oracle:thin:@45.58.2.218:1521:WBUSA", "wbusa", "woobo23300usa");
@@ -86,14 +97,13 @@ public class ItemController {
             e.printStackTrace();
         } finally {
             try {
-                if (conn != null && !conn.isClosed()) {   // ← null 체크 먼저
+                if (conn != null && !conn.isClosed()) {
                     conn.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
     }
 
 }
