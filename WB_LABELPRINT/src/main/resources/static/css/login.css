@@ -136,3 +136,53 @@
     margin: 0;
     text-transform: uppercase;
 }
+
+/* ============ Country (DB) ============ */
+.country-group {
+    gap: 8px;
+}
+
+.country-label {
+    flex: 1;
+    width: auto;              /* 기존 label width:40px 무력화 */
+    height: 42px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7684;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+/* 라디오는 화면에서 숨기되 포커스/키보드 접근성은 유지 */
+.country-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    pointer-events: none;
+}
+
+.country-label:hover {
+    border-color: #4a90e2;
+    color: #2c3e50;
+}
+
+/* 선택된 박스 강조 */
+.country-label:has(input:checked) {
+    border-color: #4a90e2;
+    background-color: #4a90e2;
+    color: #ffffff;
+}
+
+/* 키보드 탭 포커스 시 외곽선 (focus 링과 동일 톤) */
+.country-label:has(input:focus-visible) {
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.12);
+}

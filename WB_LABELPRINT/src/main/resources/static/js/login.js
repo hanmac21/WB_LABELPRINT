@@ -10,22 +10,31 @@ $(document).ready(function () {
 
         const id = $('#id').val().trim();
         const password = $('#password').val().trim();
+        const country = $('input[name="country"]:checked').val();
         const rememberId = $('#rememberId').is(':checked');
 
-        if (id !== 'woobo' || password !== 'a1234') {
-            alert('ID or Password does not match');
-            $('#id').focus();
-            return;
-        }
-
-        // ID 기억하기 처리
         if (rememberId) {
             localStorage.setItem(STORAGE_KEY, id);
         } else {
             localStorage.removeItem(STORAGE_KEY);
         }
 
-        location.href = '/main';
+        $.ajax({
+            url: '/login',
+            method: 'POST',
+            data: {
+                username: id,
+                password: password,
+                country: country
+            },
+            success: function () {
+                location.href = '/main';
+            },
+            error: function () {
+                alert('ID or Password does not match');
+                $('#id').focus();
+            }
+        });
     });
 
     // 저장된 ID 불러와서 자동 입력
