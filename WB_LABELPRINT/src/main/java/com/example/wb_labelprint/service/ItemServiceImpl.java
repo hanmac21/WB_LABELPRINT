@@ -75,7 +75,9 @@ public class ItemServiceImpl implements ItemService {
                 break;
             }
             case "BOX":
-                result.put("box", createPart(param, mapper));
+                List<String> partBarcodes = createPart(param, mapper);
+                result.put("part", partBarcodes);
+                result.put("box", partBarcodes);
                 break;
             default:
                 throw new IllegalStateException("지원하지 않는 바코드 양식: " + guide);
@@ -87,16 +89,24 @@ public class ItemServiceImpl implements ItemService {
     // OFF : 파트라벨 생성
     private List<String> createPart(PrintVO param, ItemMapper mapper) {
         List<String> barcodeList = new ArrayList<>();
+
+        // 접속 DB정보 가져오기
+        String dbType = String.valueOf(DbContextHolder.get());
+
         // 날짜 추출
-        String[] dateParts = param.getLotDate().split("-");
+        String date = param.getLotDate();
+        String[] dateParts = date.split("-");
         String year = dateParts[0];
         String month = dateParts[1];
         String day = dateParts[2];
+        String yymmdd = date.replace("-", "").substring(2);
 
         int printQty = param.getPrintQty();
         int lotQty = param.getLotQty();
         String itemcode = param.getItemcode();
         String spec = param.getSpec();
+        String labelType = param.getLabelType();
+        String car = param.getCar();
 
         // 00001 => 1
         int startLot = Integer.parseInt(param.getLotno());
@@ -104,19 +114,36 @@ public class ItemServiceImpl implements ItemService {
 
         for (int i = 0; i < printQty; i++){
             currentLot = startLot + i;
-            String barcode = String.join("_", day, month, year, spec,
-                    String.valueOf(lotQty), String.valueOf(currentLot));
+
+            String barcode = "";
+            // 미국
+            if ("USA".equals(dbType)) {
+                barcode = String.join("_", day, month, year, spec, String.valueOf(lotQty), String.valueOf(currentLot));
+            }
+            // 멕시코
+            else if ("MEX".equals(dbType)) {
+                barcode = String.join(",", itemcode, yymmdd, String.format("%05d", currentLot), String.format("%08.2f", (double)lotQty), "WMSMEX");
+            }
+            // 한국
+            else if ("PT".equals(dbType)) {
+                barcode = switch (labelType) {
+                    case "CART_OUT", "CART_IN" -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
+                    case "LEAR" -> "TEST";
+                    case "WMS" -> String.join(",", itemcode, yymmdd, String.format("%05d", currentLot), String.format("%08.2f", (double) lotQty), "WMSKOR");
+                    default -> barcode;
+                };
+            }
 
             Map<String, Object> map = new HashMap<>();
             map.put("barcode", barcode);
-            map.put("sdate", param.getLotDate());
+            map.put("sdate", date);
             map.put("itemcode", itemcode);
             map.put("itemname", param.getItemname());
             map.put("qty", lotQty);
             map.put("totalqty", param.getTotalQty());
             map.put("factory", "WBTA");
             map.put("custname", param.getSupplier());
-            map.put("lotno", currentLot);
+            map.put("lotno", "PT".equals(dbType) ? "P" + yymmdd + String.format("%05d", currentLot) : currentLot);
             map.put("spec", spec);
 
             mapper.insertBarcode(map);

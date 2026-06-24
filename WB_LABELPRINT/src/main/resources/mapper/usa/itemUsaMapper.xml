@@ -56,7 +56,7 @@
             #{itemcode},
             #{itemname},
             #{qty},
-            #{qty},
+            #{totalqty},
             TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
             'Y',
             'EXCEPTIONIN',

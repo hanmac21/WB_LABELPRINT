@@ -26,11 +26,115 @@
         WHERE INDATE = REPLACE(SUBSTR(#{date}, 3), '-', '')
     </select>
 
+
     <insert id="insertBarcode" parameterType="map">
-        SELECT 1 FROM DUAL
+        INSERT INTO T_SCM_BARCODE (
+            BARCODE,
+            KIND,
+            INDATE,
+            MADATE,
+            LOTNO,
+            PNO,
+            PNAME,
+            QTY,
+            TOTALQTY,
+            USEYN,
+            LABELTYPE,
+            CNAME,
+            CNO
+        ) VALUES (
+            #{barcode},
+            'WMS',
+            #{sdate},
+            #{sdate},
+            #{lotno},
+            #{itemcode},
+            #{itemname},
+            #{qty},
+            #{totalqty},
+            'Y',
+            'EXCEPTIONIN',
+            #{custname},
+            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname})
+        )
     </insert>
 
     <update id="mergeBarcodeMax">
-        SELECT 1 FROM DUAL
+        -- T_SCM_BARCODE_MAX 테이블에 ITEMCODE, SDATE가 매칭되는게 있으면 BARCODE(LOTNO)만 업데이트
+        -- 매칭되는게 없다면 INSERT
+        MERGE INTO T_SCM_BARCODE_MAX A
+        USING (
+            SELECT
+                #{itemcode} AS ITEMCODE,
+                #{sdate} AS SDATE,
+                #{lotno} AS LOTNO
+            FROM DUAL
+        )B
+        ON (
+            A.PNO = B.ITEMCODE
+            AND A.MADATE = B.SDATE
+        )
+        WHEN MATCHED THEN
+            UPDATE
+                SET A.BARCODE = B.LOTNO
+        WHEN NOT MATCHED THEN
+        INSERT (
+            PNO,
+            MADATE,
+            BARCODE
+        ) VALUES (
+            B.ITEMCODE,
+            B.SDATE,
+            B.LOTNO
+        )
     </update>
+
+    <!-- 해당 날짜에 있는 최신 팔레트 바코드 가져오기 -->
+    <select id="selectPalletSeq" resultType="string">
+        SELECT PBARCODE
+        FROM T_SCM_PALLET
+        WHERE SDATE = #{date}
+        ORDER BY PBARCODE DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <insert id="insertPalletBarcode">
+        INSERT INTO T_SCM_PALLET (
+            PBARCODE,
+            SDATE,
+            BBARCODE,
+            YMDHMS,
+            LOGINID,
+            ITEMCODE,
+            CUSTCODE,
+            CUSTNAME,
+            BDATE,
+            SEQ,
+            QTY,
+            SCMMEX,
+            LABELTYPE,
+            LASTSTATUS,
+            LASTFACTORY,
+            FACTORY,
+            LASTQTY
+        ) VALUES (
+            #{pbarcode},
+            #{sdate},
+            #{barcode},
+            TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
+            #{loginid},
+            #{itemcode},
+            #{custcode},
+            #{custname},
+            #{bdate},
+            #{seq},
+            #{qty},
+            #{scmmex},
+            #{labelType},
+            #{laststatus},
+            #{factory},
+            #{factory},
+            #{qty}
+        )
+    </insert>
 </mapper>

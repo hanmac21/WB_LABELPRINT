@@ -229,7 +229,8 @@ function loadSuppliers() {
 // LABEL TYPE(PT)별 양식 — 실제 규칙으로 교체
 function buildLabelTypeFormats() {
     return {
-        CART: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
+        CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
+        CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         LEAR: `CHECKING...`,     // 리어 파트
         WMS:  `ITEMCODE,LOTDATE,LOTNO,LOTQTY,WMSKOR`   // WMS 파트
     };
@@ -245,7 +246,8 @@ function setupCountryExtras(country) {
     if (country === 'PT') {
         $ptExtra.empty()
             .append($('<option>').val('').text('선택'))
-            .append($('<option>').val('CART').text('대차'))
+            .append($('<option>').val('CART_OUT').text('대차(출고 일반)'))
+            .append($('<option>').val('CART_IN').text('대차(내부 일반)'))
             .append($('<option>').val('LEAR').text('리어 파트'))
             .append($('<option>').val('WMS').text('WMS 파트'));
         $wrap.show();
@@ -422,6 +424,7 @@ async function print() {
     const data = [
         ['ITEM CODE', printData.itemcode],
         ['ITEM NAME', printData.itemname],
+        ['SUPPLIER', printData.supplier],
         ['LOT DATE',  printData.lotDate],
         ['LOTNO',     printData.lotno],
         ['LOT QTY',   printData.lotQty.toLocaleString('en-US')],
@@ -508,23 +511,28 @@ function openLabelPdf(barcodes, printData, type) {
     const params = new URLSearchParams({
         barcodes: barcodes.join(';'),
         qty: printData.lotQty,
-        type: type
+        labelType: printData.labelType,
+        guide: type
     });
 
     const url = '/label/print?' + params.toString();
 
-    const features = [
-        'width=900',
-        'height=800',
-        'resizable=yes',
-        'scrollbars=yes',
-        'toolbar=no',
-        'menubar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
+    const width = 900;
+    const height = 800;
 
-    // 창 이름을 type별로 다르게 → 파트/팔레트가 서로 다른 창에 뜸
+    // part는 왼쪽, 그 외(pallet/box)는 오른쪽
+    const left = (type === 'part') ? 0 : (screen.availWidth - width);
+    const top = 0;
+
+    const features = `
+        width=${width},
+        height=${height},
+        left=${left},
+        top=${top},
+        resizable=yes,
+        scrollbars=yes
+    `;
+
     window.open(url, 'labelPreview_' + type, features);
 }
 

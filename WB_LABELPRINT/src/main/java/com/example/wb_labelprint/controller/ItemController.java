@@ -10,6 +10,7 @@ import net.sf.jasperreports.engine.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Arrays;
@@ -23,6 +24,11 @@ public class ItemController {
     @Autowired
     public ItemServiceImpl itemService;
 
+    private final DataSource dataSource;   // routingDataSource (@Primary)
+
+    public ItemController(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @PostMapping("/items/search")
     public List<ItemVO> search(@RequestBody ItemVO itemVO){
@@ -52,15 +58,16 @@ public class ItemController {
 
     @GetMapping("/label/print")
     @ResponseBody
-    public void labelPrint(HttpServletResponse response, HttpServletRequest request,
-                           @RequestParam Map<String, String> param) {
+    public void labelPrint(HttpServletResponse response, HttpServletRequest request, @RequestParam Map<String, String> param) {
+        // 파트 라벨 타입 (대차, 리어, WMS)
+        String labelType = param.getOrDefault("labelType", "");
 
-        // 라벨 양식 종류 (part / pallet / box)
-        String type = param.getOrDefault("type", "part");
+        // 가이드 (OFF / PALLET / BOX)
+        String guide = param.getOrDefault("guide", "part");
 
         // 종류별 템플릿 선택
         String templatePath;
-        switch (type) {
+        switch (guide) {
             case "pallet":
                 templatePath = "C:/reportILPS/WB_Label_Pallet.jrxml";   // 팔레트 양식
                 break;
@@ -69,10 +76,11 @@ public class ItemController {
                 break;
             case "part":
             default:
-                templatePath = "C:/reportILPS/WB_Label_10x8.jrxml";     // 기존 파트 양식
+                // part 안에서 PT LABEL TYPE에 따라 양식 분기
+                templatePath = resolvePartTemplate(labelType);
                 break;
         }
-        System.out.println("type : " + type + ", templatePath : " + templatePath);
+        System.out.println("guide : " + guide + ", templatePath : " + templatePath);
 
         String barcodesRaw = param.get("barcodes");
         if (barcodesRaw == null || barcodesRaw.isBlank()) {
@@ -91,14 +99,14 @@ public class ItemController {
             JasperReport jasperReport = JasperCompileManager.compileReport(templatePath);
 
             Map<String, Object> paramMap = new HashMap<>();
-            if ("pallet".equals(type)) {
+            if ("pallet".equals(guide)) {
                 paramMap.put("pbarcode", barcodeForSql);
             } else {
                 paramMap.put("barcode", barcodeForSql);
             }
 
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            conn = DriverManager.getConnection("jdbc:oracle:thin:@45.58.2.218:1521:WBUSA", "wbusa", "woobo23300usa");
+            conn = dataSource.getConnection();
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "inline; filename=label.pdf");
 
@@ -116,6 +124,15 @@ public class ItemController {
                 e.printStackTrace();
             }
         }
+    }
+
+    private String resolvePartTemplate(String labelType) {
+        return switch (labelType) {
+            case "CART_OUT" -> "C:/reportILPS/WB_Label_Cart_out.jrxml";   // 대차
+            case "CART_IN" -> "C:/reportILPS/WB_Label_Cart_in.jrxml";   // 대차
+            case "LEAR" -> "C:/reportILPS/WB_Label_Lear.jrxml";   // 리어 파트
+            default -> "C:/reportILPS/WB_Label_10x8.jrxml";   // WMS 파트, 기본 파트
+        };
     }
 
 }
