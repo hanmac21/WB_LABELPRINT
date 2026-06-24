@@ -13,6 +13,12 @@ $(document).ready(function () {
  * ===================================================== */
 
 function init() {
+    // 상단바 - 현재 연결된 DB 표시
+    loadCurrentCountry();
+
+    // 고객사 선택
+    loadSuppliers();
+
     // 오늘 날짜 선택
     $('#lotDate').val(getTodayString());
     //$('#lotDate').attr('min', getTodayString());   // 오늘 이전 날짜 선택 불가
@@ -37,6 +43,9 @@ function init() {
  * ===================================================== */
 
 function bindEvents() {
+    // 로그아웃
+    $('#btnLogout').on('click', logout);
+
     // 검색
     $('#btnSearch').on('click', search);
 
@@ -85,8 +94,53 @@ function bindEvents() {
         updateGuideHighlight();
     });
 
+    // LABEL TYPE(PT) 선택 시 양식 안내 갱신
+    $('#ptExtra').on('change', updateLabelTypeExample);
+
     // 출력 창 닫기 모달
     $('#printModalClose').on('click', closePrintModal);
+}
+
+/* =====================================================
+ * TOPBAR — 상단바 (DB 표시 / 로그아웃)
+ * ===================================================== */
+
+function loadCurrentCountry() {
+    $.ajax({
+        url: '/session/country',
+        type: 'GET',
+        dataType: 'text',
+        success: function (country) {
+            $('#dbName').text(country === "PT" ? "KOR" : country);
+            guideFormats = buildGuideFormats(country);
+            updateGuideHighlight();                       // 포맷 반영
+
+            setupCountryExtras(country);   // ← PT 전용 영역 처리
+        },
+        error: function () {
+            $('#dbName').text('-');
+            guideFormats = buildGuideFormats('USA');      // ← 추가
+        }
+    });
+}
+
+function logout() {
+    Modal.confirm({
+        title: 'LOGOUT',
+        message: 'Are you sure you want to log out?',
+        okText: 'LOGOUT',
+        cancelText: 'CANCEL'
+    }).then(function (ok) {
+        if (!ok) return;
+
+        $.ajax({
+            url: '/logout',
+            type: 'POST',
+            complete: function () {
+                location.href = '/login';
+            }
+        });
+    });
 }
 
 
@@ -154,6 +208,69 @@ function renderTable(items) {
     });
 }
 
+/* =====================================================
+ * SUPPLIER — 고객사 조회
+ * ===================================================== */
+
+function loadSuppliers() {
+    $.ajax({
+        url: '/suppliers',
+        type: 'GET',
+        dataType: 'json',
+        success: function (list) {
+            const $sel = $('#supplier').empty();
+            list.forEach(function (s) {
+                $sel.append($('<option>').val(s).text(s));
+            });
+        }
+    });
+}
+
+// LABEL TYPE(PT)별 양식 — 실제 규칙으로 교체
+function buildLabelTypeFormats() {
+    return {
+        CART: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
+        LEAR: `CHECKING...`,     // 리어 파트
+        WMS:  `ITEMCODE,LOTDATE,LOTNO,LOTQTY,WMSKOR`   // WMS 파트
+    };
+}
+
+let labelTypeFormats = null;
+
+// country별 추가 입력 영역 제어
+function setupCountryExtras(country) {
+    const $wrap = $('#ptExtraWrap');
+    const $ptExtra = $('#ptExtra');
+
+    if (country === 'PT') {
+        $ptExtra.empty()
+            .append($('<option>').val('').text('선택'))
+            .append($('<option>').val('CART').text('대차'))
+            .append($('<option>').val('LEAR').text('리어 파트'))
+            .append($('<option>').val('WMS').text('WMS 파트'));
+        $wrap.show();
+
+        labelTypeFormats = buildLabelTypeFormats();   // ← 양식 준비
+        updateLabelTypeExample();                     // ← 초기 표시
+    } else {
+        $wrap.hide();
+        $ptExtra.empty();
+    }
+}
+
+// LABEL TYPE 선택값에 따라 안내창 갱신
+function updateLabelTypeExample() {
+    const selected = $('#ptExtra').val();
+    const formats = labelTypeFormats || {};
+
+    // 미선택('')이면 숨김
+    if (!selected) {
+        // 공간은 유지하고 내용만 비움 → 아래가 안 밀림
+        $('#ptExample').css('visibility', 'hidden').text('');
+    } else {
+        $('#ptExample').css('visibility', 'visible').text(formats[selected] || '');
+    }
+}
 
 /* =====================================================
  * LOTNO — 로트번호 조회
@@ -230,11 +347,20 @@ function validateQty($input, min, max) {
  * ===================================================== */
 
 // 가이드별 바코드 양식 (고정 텍스트 — 실제 값 아님, 생성 형식 안내)
-const GUIDE_FORMATS = {
-    OFF:    'ITEMCODE,YYMMDD,LOTNO,LOTQTY,WMSUSA',
-    PALLET: 'P+SERIAL,CUSTOMERCODE,TOTALQTY,WMSUSA',
-    BOX:    'DD_MM_YYYY_CUSTOMERCODE_LOTQTY_LOTNO'
-};
+// country → WMS 접미사
+const WMS_SUFFIX = { USA: 'WMSUSA', PT: 'WMSKOR', MEX: 'WMSMEX' };
+
+// country 확정되면 채워짐 (응답 전엔 USA 기준 기본값 사용)
+let guideFormats = null;
+
+function buildGuideFormats(country) {
+    const wms = WMS_SUFFIX[country] || 'WMSUSA';
+    return {
+        OFF:    ``,
+        PALLET: `P+SERIAL,ITEMCODE,TOTALQTY,${wms}`,
+        BOX:    'DD_MM_YYYY_CUSTOMERCODE_LOTQTY_LOTNO'   // WMS 미포함
+    };
+}
 
 function updateGuideHighlight() {
     const selected = $('#guideOption').val();
@@ -242,8 +368,14 @@ function updateGuideHighlight() {
     $('.guide-line').removeClass('guide-active');
     $('.guide-line[data-option="' + selected + '"]').addClass('guide-active');
 
-    // 바코드 양식 표시
-    $('#guideExample').text(GUIDE_FORMATS[selected] || '');
+    // country 응답 전이면 USA 기준 기본값
+    const formats = guideFormats || buildGuideFormats('USA');
+    // OFF면 자리는 유지하고 내용만 숨김
+    if (selected === 'OFF') {
+        $('#guideExample').css('visibility', 'hidden').text('');
+    } else {
+        $('#guideExample').css('visibility', 'visible').text(formats[selected] || '');
+    }
 }
 
 
@@ -255,6 +387,13 @@ async function print() {
 
     if (row.length === 0) {
         Modal.alert('Please select an item from the table.');
+        return;
+    }
+
+    // PT(라벨 타입 영역이 보일 때)만 LABEL TYPE 필수 검증
+    const $ptWrap = $('#ptExtraWrap');
+    if ($ptWrap.is(':visible') && !$('#ptExtra').val()) {
+        Modal.alert('Please select a label type.');
         return;
     }
 
@@ -275,6 +414,7 @@ async function print() {
         supplier:  $('#supplier').val(),
 
         // 바코드 타입
+        labelType: $('#ptExtra').val() || '',
         guide:     $('#guideOption').val()
     };
 
@@ -287,8 +427,15 @@ async function print() {
         ['LOT QTY',   printData.lotQty.toLocaleString('en-US')],
         ['PRINT QTY', printData.printQty.toLocaleString('en-US')],
         ['TOTAL QTY', printData.totalQty.toLocaleString('en-US')],
-        ['GUIDE',     printData.guide]
     ];
+
+    // PT면 LABEL TYPE도 표에 추가
+    if (printData.labelType) {
+        data.push(['LABEL TYPE', printData.labelType]);
+    }
+
+    data.push(['GUIDE', printData.guide]);
+
 
     const tableHtml =
         '<table class="cmodal-table">' +

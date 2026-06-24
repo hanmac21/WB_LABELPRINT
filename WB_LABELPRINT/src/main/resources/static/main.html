@@ -10,6 +10,14 @@
     <script src="/js/modal.js"></script>
     <script src="/js/main.js"></script>
 </head>
+<header class="topbar">
+    <div class="topbar-left">
+        <span class="db-name" id="dbName">-</span>
+    </div>
+    <div class="topbar-right">
+        <button class="btn-logout" id="btnLogout">LOGOUT</button>
+    </div>
+</header>
 <body>
     <!-- Search / Filter Panel -->
     <section class="filter-panel">
@@ -36,11 +44,22 @@
 
             <!-- 중앙: 로트 정보 -->
             <div class="lot-area">
-                <div class="field">
-                    <label class="label-accent">SUPPLIER</label>
-                    <select id="supplier">
-                        <option>WBTM</option>
-                    </select>
+                <div class="lot-row">
+                    <div class="field-v">
+                        <label class="label-accent">SUPPLIER</label>
+                        <select id="supplier">
+                            <!-- 동적으로 추가 -->
+                        </select>
+                    </div>
+
+                    <!-- PT 전용: 기본 숨김 -->
+                    <div class="field-v pt-only" id="ptExtraWrap" style="display:none;">
+                        <label class="label-accent">LABEL TYPE</label>
+                        <select id="ptExtra">
+                            <!-- 동적으로 추가 -->
+                        </select>
+                        <div class="guide-example" id="ptExample" style="visibility:hidden;"></div>
+                    </div>
                 </div>
                 <div class="lot-row">
                     <div class="field-v">

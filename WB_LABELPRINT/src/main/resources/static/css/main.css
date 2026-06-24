@@ -10,7 +10,7 @@ body {
 /* ============ Filter Panel ============ */
 .filter-panel {
     background: #ffffff;
-    padding: 16px 24px;
+    padding: 12px 24px;
     border-bottom: 1px solid #e1e5eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     flex-shrink: 0;
@@ -19,7 +19,7 @@ body {
 .filter-row {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 28px;
     max-width: 1800px;
     margin: 0 auto;
 }
@@ -29,7 +29,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    width: 420px;
+    width: 400px;
     flex-shrink: 0;
 }
 
@@ -43,7 +43,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     color: #6b7684;
-    width: 125px;
+    width: 120px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     flex-shrink: 0;
@@ -56,12 +56,12 @@ body {
 .field input,
 .field select {
     flex: 1;
-    height: 34px;
-    padding: 0 10px;
+    height: 30px;
+    padding: 0 9px;
     border: 1px solid #d6dbe1;
     border-radius: 6px;
     background: #ffffff;
-    font-size: 13px;
+    font-size: 12px;
     font-family: inherit;
     color: #2c3e50;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -77,13 +77,13 @@ body {
 
 /* ============ SEARCH 버튼 ============ */
 .btn-search {
-    height: 116px;
-    width: 100px;
+    height: 106px;
+    width: 92px;
     background: #1e6b3a;
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 2px;
     cursor: pointer;
@@ -104,9 +104,9 @@ body {
 .lot-area {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    flex: 0 1 auto;        /* flex: 1 → flex: 0 1 auto */
-    max-width: 560px;      /* ← 추가 */
+    gap: 8px;
+    flex: 0 1 auto;
+    max-width: 560px;
     min-width: 0;
     border-left: 1px solid #e1e5eb;
     padding-left: 16px;
@@ -114,7 +114,7 @@ body {
 
 .lot-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .field-v {
@@ -126,7 +126,7 @@ body {
 }
 
 .field-v label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     color: #6b7684;
     letter-spacing: 0.5px;
@@ -139,12 +139,12 @@ body {
 
 .field-v input,
 .field-v select {
-    height: 34px;
-    padding: 0 10px;
+    height: 30px;
+    padding: 0 9px;
     border: 1px solid #d6dbe1;
     border-radius: 6px;
     background: #ffffff;
-    font-size: 13px;
+    font-size: 12px;
     font-family: inherit;
     color: #2c3e50;
     width: 100%;
@@ -156,6 +156,13 @@ body {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* select 글자 지연 방지 */
+.field-v select,
+.field select,
+.guide-select {
+    transition: none;
 }
 
 .readonly-input {
@@ -172,6 +179,18 @@ body {
     color: #2c3e50;
 }
 
+/* SUPPLIER 줄에서 비율 조정이 필요하면 */
+#ptExtraWrap {
+    flex: 2;
+}
+
+/* LABEL TYPE 양식 안내 — 높이 고정으로 레이아웃 점프 방지 */
+#ptExample {
+    min-height: 25px;
+    margin-top: 6px;
+    box-sizing: border-box;
+}
+
 /* ============ Input Spinner ============ */
 .input-with-spinner {
     position: relative;
@@ -185,8 +204,8 @@ body {
 .input-spinner {
     position: absolute;
     top: 50%;
-    left: 50%;                              /* ← right: 10px → left: 50% */
-    transform: translate(-50%, -50%);       /* ← X, Y 둘 다 -50% */
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 16px;
     height: 16px;
     border: 2px solid #e1e5eb;
@@ -215,8 +234,8 @@ body {
 }
 
 .btn-print {
-    width: 110px;
-    height: 40px;
+    width: 104px;
+    height: 38px;
     background: #d93838;
     color: #ffffff;
     border: none;
@@ -252,7 +271,7 @@ body {
 }
 
 .total-value {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
     color: #2c3e50;
 }
@@ -270,7 +289,7 @@ body {
 .guide-text {
     width: 260px;
     flex-shrink: 0;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
     color: #6b7684;
     margin-right: 8px;
@@ -283,12 +302,12 @@ body {
 }
 
 .guide-select {
-    height: 34px;
-    padding: 0 10px;
+    height: 30px;
+    padding: 0 9px;
     border: 1px solid #d6dbe1;
     border-radius: 6px;
     background: #ffffff;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #2c3e50;
     min-width: 80px;
@@ -314,9 +333,14 @@ body {
     word-break: break-all;
 }
 
+#guideExample {
+    min-height: 25px;
+    box-sizing: border-box;
+}
+
 .btn-settings {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     background: #ffffff;
     border: 1px solid #d6dbe1;
     border-radius: 6px;
@@ -385,7 +409,7 @@ body {
 }
 
 .data-table td {
-    padding: 12px 14px;
+    padding: 8px 14px;
     text-align: center;
     border-bottom: 1px solid #eef0f3;
     color: #2c3e50;
@@ -475,4 +499,53 @@ body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ============ Top Bar ============ */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    padding: 0 24px;
+    background: #ffffff;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.db-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.btn-logout {
+    height: 32px;
+    padding: 0 16px;
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-logout:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
 }

@@ -5,6 +5,7 @@ import com.example.wb_labelprint.vo.ItemVO;
 import com.example.wb_labelprint.vo.PrintVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.sf.jasperreports.engine.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,17 @@ public class ItemController {
     @PostMapping("/barcode/create")
     public Map<String, List<String>> createBarcodes(@RequestBody PrintVO param){
         return itemService.createBarcodes(param);
+    }
+
+    @GetMapping("/suppliers")
+    @ResponseBody
+    public List<String> suppliers(HttpSession session) {
+        String country = (String) session.getAttribute("country");
+        return switch (country == null ? "USA" : country) {
+            case "MEX" -> List.of("WBMX");
+            case "PT"  -> List.of("(주)우보테크", "리어코리아(유)");
+            default    -> List.of("WBTM");
+        };
     }
 
     @GetMapping("/label/print")

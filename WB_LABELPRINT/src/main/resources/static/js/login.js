@@ -1,9 +1,12 @@
 $(document).ready(function () {
 
+    // 로컬 스토리지에 사용하는 변수 값
     const STORAGE_KEY = 'savedId';
+    const COUNTRY_KEY = 'savedCountry';
 
-    // 페이지 로드 시 저장된 ID 불러오기
+    // 페이지 로드 시 저장된 ID, DB 불러오기
     loadSavedId();
+    loadSavedCountry();
 
     $('#loginForm').on('submit', function (e) {
         e.preventDefault();
@@ -18,6 +21,9 @@ $(document).ready(function () {
         } else {
             localStorage.removeItem(STORAGE_KEY);
         }
+
+        // 선택한 country 저장 (다음 로그인 때 자동 선택)
+        localStorage.setItem(COUNTRY_KEY, country);
 
         $.ajax({
             url: '/login',
@@ -46,6 +52,17 @@ $(document).ready(function () {
             $('#password').focus();   // 저장된 ID 있으면 비밀번호 입력칸으로 포커스
         } else {
             $('#id').focus();
+        }
+    }
+
+    // 저장된 country 불러와서 라디오 자동 선택
+    function loadSavedCountry() {
+        const savedCountry = localStorage.getItem(COUNTRY_KEY);
+        if (savedCountry) {
+            const $radio = $('input[name="country"][value="' + savedCountry + '"]');
+            if ($radio.length) {
+                $radio.prop('checked', true);
+            }
         }
     }
 });

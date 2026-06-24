@@ -30,11 +30,30 @@ public class MainController {
         }
 
         session.setAttribute("country", country);
+        session.setAttribute("isLogin", true);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/main")
-    public String main() {
+    public String main(HttpSession session) {
+        Boolean isLogin = (Boolean) session.getAttribute("isLogin");
+
+        if (isLogin == null || !isLogin) {
+            return "redirect:/login";   // 로그인 안 했으면 로그인으로
+        }
         return "forward:/main.html";
+    }
+
+    @GetMapping("/session/country")
+    @ResponseBody
+    public String currentCountry(HttpSession session) {
+        Object country = session.getAttribute("country");
+        return country != null ? country.toString() : "USA";
+    }
+
+    @PostMapping("/logout")
+    @ResponseBody
+    public void logout(HttpSession session) {
+        session.invalidate();
     }
 }
