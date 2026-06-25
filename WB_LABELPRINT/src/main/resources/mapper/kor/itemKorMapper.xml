@@ -23,7 +23,8 @@
     <select id="getNextLotNo" resultType="string">
         SELECT BARCODE
         FROM T_SCM_BARCODE_MAX
-        WHERE INDATE = REPLACE(SUBSTR(#{date}, 3), '-', '')
+        WHERE MADATE = #{date}
+        AND PNO = #{itemcode}
     </select>
 
 
@@ -41,7 +42,8 @@
             USEYN,
             LABELTYPE,
             CNAME,
-            CNO
+            CNO,
+            LOGINID
         ) VALUES (
             #{barcode},
             'WMS',
@@ -55,7 +57,8 @@
             'Y',
             'EXCEPTIONIN',
             #{custname},
-            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname})
+            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname}),
+            #{loginid}
         )
     </insert>
 

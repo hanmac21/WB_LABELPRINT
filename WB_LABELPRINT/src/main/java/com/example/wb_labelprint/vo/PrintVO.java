@@ -25,6 +25,9 @@ public class PrintVO {
     private String labelType;
     private String guide;
 
+    // 로그인 아이디
+    private String loginid;
+
     // 라벨 출력 시 전달되는 바코드 리스트
     private List<String> barcodes;
 }

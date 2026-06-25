@@ -34,6 +34,7 @@ $(document).ready(function () {
                 country: country
             },
             success: function () {
+                document.cookie = 'userId=' + encodeURIComponent(id) + '; path=/';      // 로그인 성공 시 쿠키 저장
                 location.href = '/main';
             },
             error: function () {

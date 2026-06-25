@@ -519,6 +519,10 @@ body {
     align-items: center;
     gap: 8px;
 }
+.wooboTopLogo{
+    width: 10%;
+    margin-right: 15px;
+}
 
 .db-name {
     font-size: 14px;

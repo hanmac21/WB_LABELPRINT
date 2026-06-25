@@ -417,7 +417,10 @@ async function print() {
 
         // 바코드 타입
         labelType: $('#ptExtra').val() || '',
-        guide:     $('#guideOption').val()
+        guide:     $('#guideOption').val(),
+
+        // 로그인한 사용자
+        loginid:    getCookie('userId')
     };
 
     // 확인 모달용 표 HTML

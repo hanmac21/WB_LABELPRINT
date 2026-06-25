@@ -107,6 +107,7 @@ public class ItemServiceImpl implements ItemService {
         String spec = param.getSpec();
         String labelType = param.getLabelType();
         String car = param.getCar();
+        String loginid = param.getLoginid();
 
         // 00001 => 1
         int startLot = Integer.parseInt(param.getLotno());
@@ -145,6 +146,7 @@ public class ItemServiceImpl implements ItemService {
             map.put("custname", param.getSupplier());
             map.put("lotno", "PT".equals(dbType) ? "P" + yymmdd + String.format("%05d", currentLot) : currentLot);
             map.put("spec", spec);
+            map.put("loginid", loginid);
 
             mapper.insertBarcode(map);
             barcodeList.add(barcode);
