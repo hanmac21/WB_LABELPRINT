@@ -8,6 +8,7 @@
         inner join t_mi_typesub d on c.carno = d.subcode and d.typecode = 'MI041'
         left outer join t_mi_typesub H on c.cmb_UNIT = H.subcode and H.typecode = 'MI001'
         WHERE DELDATE = ' '
+        AND C.BRANCH = '001'
         <if test="itemcode != null and itemcode != ''">
             AND UPPER(ITEMCODE) LIKE '%' || UPPER(#{itemcode}) || '%'
         </if>
