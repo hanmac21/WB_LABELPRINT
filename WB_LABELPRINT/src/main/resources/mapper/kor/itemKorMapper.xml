@@ -3,12 +3,29 @@
 
 <mapper namespace="com.example.wb_labelprint.mapper.kor.ItemKorMapper">
     <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
-        SELECT D.SUBNAME AS CAR,ITEMCODE,SPEC,ITEMNAME,H.SUBNAME AS UNIT
-        FROM T_MI_ITEM C
-        inner join t_mi_typesub d on c.carno = d.subcode and d.typecode = 'MI041'
-        left outer join t_mi_typesub H on c.cmb_UNIT = H.subcode and H.typecode = 'MI001'
-        WHERE DELDATE = ' '
-        AND C.BRANCH = '001'
+        SELECT
+            D.SUBNAME AS ITEMTYPE,
+            B.SUBNAME AS CAR,
+            ITEMCODE,
+            SPEC,
+            ITEMNAME,
+            C.SUBNAME AS UNIT,
+            DELDATE
+        FROM T_MI_ITEM A
+        INNER JOIN T_MI_TYPESUB B ON A.CARNO = B.SUBCODE AND B.TYPECODE = 'MI041'
+        LEFT JOIN T_MI_TYPESUB C ON A.CMB_UNIT = C.SUBCODE AND C.TYPECODE = 'MI041'
+        LEFT JOIN T_MI_TYPESUB D ON A.CMB_ITEMTYPE = D.SUBCODE AND D.TYPECODE = 'MI002'
+        WHERE 1 = 1
+        AND A.BRANCH = '001'    -- 울산 고정 (추후 수정 예정)
+        <if test="scrap != null and scrap == 'false'">
+            AND DELDATE = ' '
+        </if>
+        <if test="itemtype != null and itemtype != ''">
+            AND UPPER(D.SUBNAME) LIKE '%' || UPPER(#{itemtype}) || '%'
+        </if>
+        <if test="car != null and car != ''">
+            AND UPPER(B.SUBNAME) LIKE '%' || UPPER(#{car}) || '%'
+        </if>
         <if test="itemcode != null and itemcode != ''">
             AND UPPER(ITEMCODE) LIKE '%' || UPPER(#{itemcode}) || '%'
         </if>

@@ -10,7 +10,7 @@ body {
 /* ============ Filter Panel ============ */
 .filter-panel {
     background: #ffffff;
-    padding: 12px 24px;
+    padding: 12px 24px 12px 12px;
     border-bottom: 1px solid #e1e5eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     flex-shrink: 0;
@@ -26,11 +26,17 @@ body {
 
 /* ============ 좌측: 검색 영역 ============ */
 .search-area {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 400px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 14px;
+    row-gap: 8px;
+    width: 480px;
     flex-shrink: 0;
+}
+
+/* 2열 폭에 맞춰 라벨 폭 축소 */
+.search-area .field label {
+    width: 68px;
 }
 
 .field {
@@ -73,6 +79,63 @@ body {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ============ 폐기(SCRAP) 토글 ============ */
+.field-toggle label {
+    width: 78px;
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.toggle-track {
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background: #cbd5e1;
+    position: relative;
+    transition: background-color 0.15s;
+    flex-shrink: 0;
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s;
+}
+
+.toggle-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #6b7684;
+    min-width: 56px;
+    text-align: left;
+}
+
+.toggle-btn[aria-pressed="true"] .toggle-track {
+    background: #1e6b3a;
+}
+.toggle-btn[aria-pressed="true"] .toggle-thumb {
+    transform: translateX(18px);
+}
+.toggle-btn[aria-pressed="true"] .toggle-text {
+    color: #1e6b3a;
 }
 
 /* ============ SEARCH 버튼 ============ */
@@ -439,6 +502,10 @@ body {
     font-size: 13px;
 }
 
+.data-table .col-itemtype {
+    width: 125px;
+}
+
 .data-table .col-car {
     width: 100px;
 }
@@ -461,6 +528,24 @@ body {
     color: #1f3a5f;
     font-weight: 700;
 }
+
+/* 폐기 행 (deldate 있음) */
+.data-table tr.row-deleted td {
+    background-color: #fdeaea;
+    color: #c0392b;
+}
+
+.data-table tr.row-deleted:hover td {
+    background-color: #fbdcdc;
+}
+
+/* 폐기 행은 선택되어도 빨간색 유지 */
+.data-table tr.row-deleted.row-selected td {
+    background-color: #f5b7b1;
+    color: #922b21;
+    font-weight: 700;
+}
+
 
 /* Empty row */
 .data-table .empty-row {

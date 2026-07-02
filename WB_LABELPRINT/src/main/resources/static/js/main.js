@@ -99,6 +99,21 @@ function bindEvents() {
 
     // 출력 창 닫기 모달
     $('#printModalClose').on('click', closePrintModal);
+
+    // 폐기 토글 버튼
+    $('#scrapToggle').on('click', function () {
+        const on = $(this).attr('aria-pressed') === 'true';
+        $(this).attr('aria-pressed', String(!on));
+        $(this).find('.toggle-text').text(on ? 'EXCLUDE' : 'INCLUDE');
+    });
+
+    // 엔터키 검색
+    $('input[type="text"]').off('keypress').on('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            search();
+        }
+    });
 }
 
 /* =====================================================
@@ -150,9 +165,12 @@ function logout() {
 
 function search() {
     const requestBody = {
+        itemtype: $('#itemtype').val().trim(),
+        car: $('#car').val().trim(),
         itemcode: $('#itemcode').val().trim(),
         spec: $('#spec').val().trim(),
-        itemname: $('#itemname').val().trim()
+        itemname: $('#itemname').val().trim(),
+        scrap: $('#scrapToggle').attr('aria-pressed') === 'true'
     };
 
     showLoading();
@@ -185,9 +203,13 @@ function renderTable(items) {
     }
 
     items.forEach(function (item, index) {
+        // 폐기 여부
+        const isDeleted = item.deldate != null && String(item.deldate).trim() !== '';
+
         const rowHtml = `
-        <tr>
+        <tr class="${isDeleted ? 'row-deleted' : ''}">
             <td class="col-no">${(index + 1).toLocaleString()}</td>
+            <td class="col-itemtype">${escapeHtml(item.itemtype)}</td>
             <td class="col-car">${escapeHtml(item.car)}</td>
             <td class="col-itemcode">${escapeHtml(item.itemcode)}</td>
             <td class="col-spec">${escapeHtml(item.spec)}</td>
@@ -248,8 +270,8 @@ function setupCountryExtras(country) {
             .append($('<option>').val('').text('선택'))
             .append($('<option>').val('CART_OUT').text('대차(출고 일반)'))
             .append($('<option>').val('CART_IN').text('대차(내부 일반)'))
-            .append($('<option>').val('LEAR').text('리어 파트'))
-            .append($('<option>').val('WMS').text('WMS 파트'));
+            .append($('<option>').val('CART_SMALL').text('대차(내부 소형)'))
+            .append($('<option>').val('HEADREST').text('부품'))
         $wrap.show();
 
         labelTypeFormats = buildLabelTypeFormats();   // ← 양식 준비
