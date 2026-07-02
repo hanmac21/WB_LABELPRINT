@@ -253,8 +253,8 @@ function buildLabelTypeFormats() {
     return {
         CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
-        LEAR: `CHECKING...`,     // 리어 파트
-        WMS:  `ITEMCODE,LOTDATE,LOTNO,LOTQTY,WMSKOR`   // WMS 파트
+        CART_SMALL: `ITEMCODE`,        // 대차
+        HEADREST: `CHECKING...`,     // 부품
     };
 }
 
@@ -459,18 +459,23 @@ async function print() {
 
     // PT면 LABEL TYPE도 표에 추가
     if (printData.labelType) {
-        data.push(['LABEL TYPE', printData.labelType]);
+        data.push(['LABEL TYPE', $('#ptExtra option:selected').text()]);
     }
 
     data.push(['GUIDE', printData.guide]);
 
 
-    const tableHtml =
-        '<table class="cmodal-table">' +
-        data.map(function (r) {
-            return '<tr><th>' + r[0] + '</th><td>' + escapeHtml(r[1]) + '</td></tr>';
-        }).join('') +
-        '</table>';
+    const tableHtml = `
+        <table class="cmodal-table">
+            ${data.map(function (r) {
+                return `
+                    <tr>
+                        <th>${r[0]}</th>
+                        <td>${escapeHtml(r[1])}</td>
+                    </tr>`;
+            }).join('')}
+        </table>
+    `;
 
     const ok = await Modal.confirm({
         title: 'CONFIRM LABEL PRINTING',
@@ -509,7 +514,7 @@ function doPrint(printData) {
 // 출력 모달 열기
 function openPrintModal(result, printData) {
     const items = [];
-    if (result.part)   items.push({ label: 'PRINT PART LABEL',   barcodes: result.part,   type: 'part' });
+    if (result.part)   items.push({ label: 'PRINT LABEL',   barcodes: result.part,   type: 'part' });
     if (result.pallet) items.push({ label: 'PRINT PALLET LABEL', barcodes: result.pallet, type: 'pallet' });
     if (result.box)    items.push({ label: 'PRINT BOX LABEL',    barcodes: result.box,    type: 'box' });
 

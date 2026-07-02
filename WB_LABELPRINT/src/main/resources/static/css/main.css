@@ -244,7 +244,7 @@ body {
 
 /* SUPPLIER 줄에서 비율 조정이 필요하면 */
 #ptExtraWrap {
-    flex: 2;
+    flex: 1.2;
 }
 
 /* LABEL TYPE 양식 안내 — 높이 고정으로 레이아웃 점프 방지 */
