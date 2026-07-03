@@ -128,9 +128,10 @@ public class ItemServiceImpl implements ItemService {
             // 한국
             else if ("PT".equals(dbType)) {
                 barcode = switch (labelType) {
-                    case "CART_OUT", "CART_IN" -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
-                    case "LEAR" -> "TEST";
-                    case "WMS" -> String.join(",", itemcode, yymmdd, String.format("%05d", currentLot), String.format("%08.2f", (double) lotQty), "WMSKOR");
+                    case "CART_OUT", "CART_IN", "CART_SMALL"
+                            -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
+                    case "LEAR"
+                            -> "TEST";
                     default -> barcode;
                 };
             }

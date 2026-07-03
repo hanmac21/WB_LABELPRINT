@@ -134,7 +134,7 @@ function loadCurrentCountry() {
         },
         error: function () {
             $('#dbName').text('-');
-            guideFormats = buildGuideFormats('USA');      // ← 추가
+            guideFormats = buildGuideFormats('USA');
         }
     });
 }
@@ -253,8 +253,8 @@ function buildLabelTypeFormats() {
     return {
         CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
-        CART_SMALL: `ITEMCODE`,        // 대차
-        HEADREST: `CHECKING...`,     // 부품
+        CART_SMALL: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
+        HEADREST: `HKMC 2D 바코드 - 업체코드, 품번, 추적번호, 수량`
     };
 }
 
@@ -444,6 +444,12 @@ async function print() {
         // 로그인한 사용자
         loginid:    getCookie('userId')
     };
+
+    // SPEC에 한글 포함 시 중단
+    if (/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(printData.spec)) {
+        Modal.alert('고객사 품번에 한글이 포함되어 바코드 생성이 불가능합니다.');
+        return;
+    }
 
     // 확인 모달용 표 HTML
     const data = [
