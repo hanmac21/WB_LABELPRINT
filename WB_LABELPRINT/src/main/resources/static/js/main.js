@@ -1,12 +1,13 @@
 /* =====================================================
  * ENTRY — 진입점
  * ===================================================== */
+let currentCountry = null;
+
 
 $(document).ready(function () {
     init();
     bindEvents();
 });
-
 
 /* =====================================================
  * INIT — 페이지 초기화
@@ -49,14 +50,19 @@ function bindEvents() {
     // 검색
     $('#btnSearch').on('click', search);
 
-    $('#itemcode, #spec, #itemname').on('keydown', function (e) {
+    // 엔터키 검색
+    $('#itemtype, #car, #itemcode, #spec, #itemname').on('keydown', function (e) {
         if (e.key === 'Enter') {
             search();
         }
     });
 
-    // 발행
-    $('#btnPrint').on('click', print);
+    // 폐기 토글 버튼
+    $('#scrapToggle').on('click', function () {
+        const on = $(this).attr('aria-pressed') === 'true';
+        $(this).attr('aria-pressed', String(!on));
+        $(this).find('.toggle-text').text(on ? 'EXCLUDE' : 'INCLUDE');
+    });
 
     // LOT DATE 변경 시 선택된 행 기준으로 LOTNO 재조회
     $('#lotDate').on('change', function () {
@@ -94,26 +100,14 @@ function bindEvents() {
         updateGuideHighlight();
     });
 
+    // 발행
+    $('#btnPrint').on('click', print);
+
     // LABEL TYPE(PT) 선택 시 양식 안내 갱신
     $('#ptExtra').on('change', updateLabelTypeExample);
 
     // 출력 창 닫기 모달
     $('#printModalClose').on('click', closePrintModal);
-
-    // 폐기 토글 버튼
-    $('#scrapToggle').on('click', function () {
-        const on = $(this).attr('aria-pressed') === 'true';
-        $(this).attr('aria-pressed', String(!on));
-        $(this).find('.toggle-text').text(on ? 'EXCLUDE' : 'INCLUDE');
-    });
-
-    // 엔터키 검색
-    $('input[type="text"]').off('keypress').on('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            search();
-        }
-    });
 }
 
 /* =====================================================
@@ -126,6 +120,7 @@ function loadCurrentCountry() {
         type: 'GET',
         dataType: 'text',
         success: function (country) {
+            currentCountry = country;
             $('#dbName').text(country === "PT" ? "KOR" : country);
             guideFormats = buildGuideFormats(country);
             updateGuideHighlight();                       // 포맷 반영
@@ -223,7 +218,8 @@ function renderTable(items) {
         $row.on('click', function () {
             $('.data-table tr.row-selected').removeClass('row-selected');
             $row.addClass('row-selected');
-            fetchLotno(item.itemcode);
+            fetchLotno(item.itemcode);              // LOTNO 조회
+            fetchItemInfo(item.itemcode);           // 라벨타입 + 마감처 조회
         });
 
         $tbody.append($row);
@@ -241,12 +237,72 @@ function loadSuppliers() {
         dataType: 'json',
         success: function (list) {
             const $sel = $('#supplier').empty();
+            $sel.append($('<option>').val('').text('선택'));   // 빈 값 = 선택
             list.forEach(function (s) {
                 $sel.append($('<option>').val(s).text(s));
             });
         }
     });
 }
+/* =====================================================
+ * ITEMINFO — 행 클릭 시 라벨타입 + 마감처 한 번에 조회
+ * ===================================================== */
+function fetchItemInfo(itemcode) {
+    if (currentCountry !== 'PT' || !itemcode) return;
+
+    $.ajax({
+        url: '/iteminfo',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ itemcode: itemcode }),
+        dataType: 'json',
+        success: function (result) {
+            //console.log(result);
+            applyLabelType(result.LABELINFO);
+            applyCloseCustomer(result.CLOSE_CUSTOMER);
+        },
+        error: function (xhr, status, error) {
+            console.error('ITEMINFO fetch failed:', status, error, xhr.responseText);
+            $('#ptExtra').val('');
+            updateLabelTypeExample();
+            $('#supplier').val('');
+        }
+    });
+}
+
+// 라벨타입 반영
+function applyLabelType(labelType) {
+    const value = (labelType || '').trim();
+    const $ptExtra = $('#ptExtra');
+
+    // DB 값이 option에 존재하면 자동 선택, 없으면 '선택'으로
+    if (value && $ptExtra.find('option[value="' + value + '"]').length > 0) {
+        $ptExtra.val(value);
+    } else {
+        $ptExtra.val('');
+    }
+    updateLabelTypeExample();
+}
+
+// 마감처(CLOSE_CUSTOMER) 반영 — 고정 목록에 포함되면 자동 선택
+function applyCloseCustomer(closeCustomer) {
+    const value = (closeCustomer || '').trim();
+    const $sel = $('#supplier');
+
+    let matched = '';
+    if (value) {
+        $sel.find('option').each(function () {
+            const optVal = $(this).val();
+            if (optVal && optVal.indexOf(value) !== -1) {
+                matched = optVal;
+                return false;
+            }
+        });
+    }
+    $sel.val(matched);
+}
+
+let labelTypeFormats = null;
 
 // LABEL TYPE(PT)별 양식 — 실제 규칙으로 교체
 function buildLabelTypeFormats() {
@@ -257,8 +313,6 @@ function buildLabelTypeFormats() {
         HEADREST: `HKMC 2D 바코드 - 업체코드, 품번, 추적번호, 수량`
     };
 }
-
-let labelTypeFormats = null;
 
 // country별 추가 입력 영역 제어
 function setupCountryExtras(country) {
@@ -421,6 +475,11 @@ async function print() {
         return;
     }
 
+    if (!$('#supplier').val()){
+        Modal.alert('Please select a supplier.');
+        return;
+    }
+
     const printData = {
         // 기본 정보
         car:       row.find('.col-car').text(),
@@ -470,7 +529,6 @@ async function print() {
 
     data.push(['GUIDE', printData.guide]);
 
-
     const tableHtml = `
         <table class="cmodal-table">
             ${data.map(function (r) {
@@ -494,6 +552,7 @@ async function print() {
 
     doPrint(printData);
 }
+
 function doPrint(printData) {
     if (!printData) return;
 

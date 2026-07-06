@@ -14,4 +14,6 @@ public interface ItemMapper {
     String selectPalletSeq(String date);
 
     void insertPalletBarcode(Map<String, Object> map);
+
+    Map<String, String> getItemInfo(ItemVO param);
 }

@@ -56,6 +56,13 @@ public class ItemController {
         };
     }
 
+    @PostMapping("/iteminfo")
+    @ResponseBody
+    public Map<String, String> getItemInfo(@RequestBody ItemVO param) {
+        Map<String, String> result =  itemService.getItemInfo(param);
+        return result != null ? result : new HashMap<>();
+    }
+
     @GetMapping("/label/print")
     @ResponseBody
     public void labelPrint(HttpServletResponse response, HttpServletRequest request, @RequestParam Map<String, String> param) {

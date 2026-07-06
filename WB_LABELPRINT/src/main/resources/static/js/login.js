@@ -16,6 +16,11 @@ $(document).ready(function () {
         const country = $('input[name="country"]:checked').val();
         const rememberId = $('#rememberId').is(':checked');
 
+        if (!country){
+            alert("Please select a country");
+            return;
+        }
+
         if (rememberId) {
             localStorage.setItem(STORAGE_KEY, id);
         } else {

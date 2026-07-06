@@ -57,6 +57,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public Map<String, String> getItemInfo(ItemVO param){
+        return mapper().getItemInfo(param);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, List<String>> createBarcodes(PrintVO param) {
         ItemMapper mapper = mapper();

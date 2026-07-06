@@ -12,4 +12,6 @@ public interface ItemService {
     String getNextLotNo(ItemVO param);
 
     Map<String, List<String>> createBarcodes(PrintVO param);
+
+    Map<String, String> getItemInfo(ItemVO param);
 }
