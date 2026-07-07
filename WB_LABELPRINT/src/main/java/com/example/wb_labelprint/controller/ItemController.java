@@ -138,7 +138,7 @@ public class ItemController {
             case "CART_OUT" -> "C:/reportILPS/WB_Label_Cart_out.jrxml";   // 대차 (출고 일반)
             case "CART_IN" -> "C:/reportILPS/WB_Label_Cart_in.jrxml";   // 대차 (내부 일반)
             case "CART_SMALL" -> "C:/reportILPS/WB_Label_Cart_small.jrxml";   // 대차 (내부 소형)
-            case "HEADREST" -> "C:/reportILPS/WB_Label_HREST.jrxml";   // 부품 파트
+            case "HEADREST" -> "C:/reportILPS/WB_Label_Headrest.jrxml";   // 부품 파트
             default -> "C:/reportILPS/WB_Label_10x8.jrxml";   // WMS 파트, 기본 파트
         };
     }

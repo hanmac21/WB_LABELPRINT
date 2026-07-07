@@ -310,7 +310,7 @@ function buildLabelTypeFormats() {
         CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         CART_SMALL: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
-        HEADREST: `HKMC 2D 바코드 - 업체코드, 품번, 추적번호, 수량`
+        HEADREST: `HKMC 2D 바코드 - 업체코드, 품번, 추적코드`
     };
 }
 

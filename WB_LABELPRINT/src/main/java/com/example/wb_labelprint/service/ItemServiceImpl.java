@@ -135,10 +135,23 @@ public class ItemServiceImpl implements ItemService {
                 barcode = switch (labelType) {
                     case "CART_OUT", "CART_IN", "CART_SMALL"
                             -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
-                    case "LEAR"
-                            -> "TEST";
+                    case "HEADREST"
+                            -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec.replace("-", "0") + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + String.format("%07d", currentLot)
+                                + "\u001DM" + "N" + "\u001DC" + "W0001"  + "\u001D" + "\u001E" + "\u0004";
                     default -> barcode;
                 };
+            }
+
+            // 평택의 경우
+            String lotno = "";
+            if ("PT".equals(dbType)) {
+                if (labelType.contains("CART")) {
+                    lotno = "P" + yymmdd + String.format("%05d", currentLot);
+                } else if ("HEADREST".equals(labelType)){
+                    lotno = String.format("%07d", currentLot);
+                }
+            } else {
+                lotno = String.valueOf(currentLot);
             }
 
             Map<String, Object> map = new HashMap<>();
@@ -150,7 +163,7 @@ public class ItemServiceImpl implements ItemService {
             map.put("totalqty", param.getTotalQty());
             map.put("factory", "WBTA");
             map.put("custname", param.getSupplier());
-            map.put("lotno", "PT".equals(dbType) ? "P" + yymmdd + String.format("%05d", currentLot) : currentLot);
+            map.put("lotno", lotno);
             map.put("spec", spec);
             map.put("loginid", loginid);
 
