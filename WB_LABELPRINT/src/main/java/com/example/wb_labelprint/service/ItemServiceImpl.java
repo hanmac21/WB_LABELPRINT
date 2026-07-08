@@ -136,7 +136,7 @@ public class ItemServiceImpl implements ItemService {
                     case "CART_OUT", "CART_IN", "CART_SMALL"
                             -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
                     case "HEADREST"
-                            -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec.replace("-", "0") + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + String.format("%07d", currentLot)
+                            -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + String.format("%07d", currentLot)
                                 + "\u001DM" + "N" + "\u001DC" + "W0001"  + "\u001D" + "\u001E" + "\u0004";
                     default -> barcode;
                 };

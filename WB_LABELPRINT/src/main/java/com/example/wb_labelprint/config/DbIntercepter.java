@@ -12,17 +12,26 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class DbIntercepter implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
+        boolean loggedIn = session != null && Boolean.TRUE.equals(session.getAttribute("isLogin"));
 
-        if (session != null) {
-            Object country = session.getAttribute("country");
-            if (country != null) {
-                try {
-                    DbContextHolder.set(DbType.valueOf(country.toString()));
-                } catch (IllegalArgumentException e) {
-                    DbContextHolder.set(DbType.USA);                    // 잘못된 값이면 USA
-                }
+        if (!loggedIn) {
+            String accept = request.getHeader("Accept");
+            if (accept != null && accept.contains("text/html")) {
+                response.sendRedirect("/login");
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            }
+            return false;
+        }
+
+        Object country = session.getAttribute("country");
+        if (country != null) {
+            try {
+                DbContextHolder.set(DbType.valueOf(country.toString()));
+            } catch (IllegalArgumentException e) {
+                DbContextHolder.set(DbType.USA);
             }
         }
         return true;

@@ -5,9 +5,21 @@ let currentCountry = null;
 
 
 $(document).ready(function () {
+    setupAjaxAuthGuard();
     init();
     bindEvents();
 });
+
+// 세션 끊기면 로그인 창으로
+function setupAjaxAuthGuard() {
+    let redirecting = false;
+    $(document).ajaxError(function (event, xhr) {
+        if (xhr.status === 401 && !redirecting) {
+            redirecting = true;
+            location.href = '/login';
+        }
+    });
+}
 
 /* =====================================================
  * INIT — 페이지 초기화
