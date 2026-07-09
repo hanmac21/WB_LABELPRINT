@@ -72,20 +72,21 @@ public class ItemController {
         // 가이드 (OFF / PALLET / BOX)
         String guide = param.getOrDefault("guide", "part");
 
-        // 종류별 템플릿 선택
+        // 용지 종류 (label / a4)
+        String paper = param.getOrDefault("paper", "label");
+
         String templatePath;
-        switch (guide) {
-            case "pallet":
-                templatePath = "C:/reportILPS/WB_Label_Pallet.jrxml";   // 팔레트 양식
-                break;
-            case "box":
-                templatePath = "C:/reportILPS/WB_Label_Boxlabel.jrxml";      // 박스 양식
-                break;
-            case "part":
-            default:
-                // part 안에서 PT LABEL TYPE에 따라 양식 분기
-                templatePath = resolvePartTemplate(labelType);
-                break;
+        if ("a4".equals(paper)) {
+            // A4는 labelType별 A4 템플릿
+            templatePath = resolveA4Template(labelType);
+        } else {
+            // 기존 라벨 로직 그대로
+            switch (guide) {
+                case "pallet": templatePath = "C:/reportILPS/WB_Label_Pallet.jrxml"; break;
+                case "box":    templatePath = "C:/reportILPS/WB_Label_Boxlabel.jrxml"; break;
+                case "part":
+                default:       templatePath = resolvePartTemplate(labelType); break;
+            }
         }
         System.out.println("guide : " + guide + ", templatePath : " + templatePath);
 
@@ -143,4 +144,13 @@ public class ItemController {
         };
     }
 
+    private String resolveA4Template(String labelType) {
+        return switch (labelType) {
+            case "CART_OUT"   -> "C:/reportILPS/WB_Label_A4_Cart_out.jrxml";
+            case "CART_IN"    -> "C:/reportILPS/WB_Label_A4_Cart_in.jrxml";
+            case "CART_SMALL" -> "C:/reportILPS/WB_Label_A4_Cart_small.jrxml";
+            case "HEADREST"   -> "C:/reportILPS/WB_Label_A4_Headrest.jrxml";
+            default           -> "C:/reportILPS/WB_Label_A4.jrxml";   // 기본 A4
+        };
+    }
 }

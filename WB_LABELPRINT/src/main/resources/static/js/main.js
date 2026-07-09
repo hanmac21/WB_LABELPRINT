@@ -257,7 +257,7 @@ function loadSuppliers() {
     });
 }
 /* =====================================================
- * ITEMINFO — 행 클릭 시 라벨타입 + 마감처 한 번에 조회
+ * ITEMINFO — 한국 db인 경우 행 클릭 시 라벨타입 + 마감처 한 번에 조회
  * ===================================================== */
 function fetchItemInfo(itemcode) {
     if (currentCountry !== 'PT' || !itemcode) return;
@@ -487,6 +487,28 @@ async function print() {
         return;
     }
 
+    // CART_IN이면 작업자 입력 모달 (취소=중단, 빈값=재입력)
+    let worker = '';
+    if ($('#ptExtra').val() === 'CART_IN') {
+        while (true) {
+            const input = await Modal.prompt({
+                title: 'ENTER WORKER',
+                message: 'Please enter the worker name.',
+                value: getCookie('lastWorker') || '',   // ← 지난 값 미리 채움
+                okText: 'NEXT',
+                cancelText: 'CANCEL'
+            });
+
+            if (input === null) return;      // 취소 → 발행 중단
+            worker = input.trim();
+            if (worker) {
+                setCookie('lastWorker', worker);   // ← 다음을 위해 저장
+                break;
+            }
+            await Modal.alert('Worker is required.');
+        }
+    }
+
     if (!$('#supplier').val()){
         Modal.alert('Please select a supplier.');
         return;
@@ -513,7 +535,10 @@ async function print() {
         guide:     $('#guideOption').val(),
 
         // 로그인한 사용자
-        loginid:    getCookie('userId')
+        loginid:    getCookie('userId'),
+
+        // 대차(내부 일반) 일 경우 작업자 추가
+        worker:    worker,
     };
 
     // SPEC에 한글 포함 시 중단
@@ -537,6 +562,11 @@ async function print() {
     // PT면 LABEL TYPE도 표에 추가
     if (printData.labelType) {
         data.push(['LABEL TYPE', $('#ptExtra option:selected').text()]);
+    }
+
+    // CART_IN이면 WORKER도 표에 추가
+    if (printData.labelType === 'CART_IN') {
+        data.push(['WORKER', printData.worker]);
     }
 
     data.push(['GUIDE', printData.guide]);
@@ -592,6 +622,8 @@ function doPrint(printData) {
 function openPrintModal(result, printData) {
     const items = [];
     if (result.part)   items.push({ label: 'PRINT LABEL',   barcodes: result.part,   type: 'part' });
+    // A4는 PT(한국 DB)일 때만
+    if (result.part && currentCountry === 'PT') items.push({ label: 'PRINT A4', barcodes: result.part,   type: 'part',   paper: 'a4'});
     if (result.pallet) items.push({ label: 'PRINT PALLET LABEL', barcodes: result.pallet, type: 'pallet' });
     if (result.box)    items.push({ label: 'PRINT BOX LABEL',    barcodes: result.box,    type: 'box' });
 
@@ -603,7 +635,7 @@ function openPrintModal(result, printData) {
             .text(item.label)
             .on('click', function () {
                 // 사용자 클릭에서 바로 window.open → 팝업 차단 안 됨
-                openLabelPdf(item.barcodes, printData, item.type);
+                openLabelPdf(item.barcodes, printData, item.type, item.paper);
                 // 출력 완료 표시
                 $btn.addClass('printed').prop('disabled', false);
             });
@@ -614,12 +646,13 @@ function openPrintModal(result, printData) {
 }
 
 // PDF 새 창에서 열기
-function openLabelPdf(barcodes, printData, type) {
+function openLabelPdf(barcodes, printData, type, paper) {
     const params = new URLSearchParams({
         barcodes: barcodes.join(';'),
         qty: printData.lotQty,
         labelType: printData.labelType,
-        guide: type
+        guide: type,
+        paper: paper || 'label'   // ← 용지 종류 추가
     });
 
     const url = '/label/print?' + params.toString();

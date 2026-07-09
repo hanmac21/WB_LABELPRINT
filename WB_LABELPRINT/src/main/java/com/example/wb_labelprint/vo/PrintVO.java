@@ -28,6 +28,9 @@ public class PrintVO {
     // 로그인 아이디
     private String loginid;
 
+    // 작업자
+    private String worker;
+
     // 라벨 출력 시 전달되는 바코드 리스트
     private List<String> barcodes;
 }

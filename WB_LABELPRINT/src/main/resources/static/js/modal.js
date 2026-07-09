@@ -110,6 +110,56 @@ const Modal = (function () {
         });
     }
 
+    // 커스텀 prompt — 입력값(문자열) 반환, 취소 시 null
+    function prompt(messageOrOptions) {
+        const options = normalize(messageOrOptions);
+        ensureDom();
+
+        return new Promise(function (resolve) {
+            onBackdrop = null;   // 배경 클릭 무시
+            setHeader(options.title);
+
+            // 본문: 메시지(선택) + 입력창
+            $body.removeClass('cmodal-text').empty();
+            if (options.message) {
+                $body.append($('<p class="cmodal-prompt-msg"></p>').text(options.message));
+            }
+            const $input = $('<input type="text" class="cmodal-input">')
+                .attr('placeholder', options.placeholder || '')
+                .val(options.value || '');
+            $body.append($input);
+
+            $footer.empty();
+
+            const submit = function () {
+                const val = $input.val();
+                close();
+                resolve(val);
+            };
+            const cancel = function () {
+                close();
+                resolve(null);
+            };
+
+            const $cancel = $('<button class="cmodal-btn cmodal-cancel"></button>')
+                .text(options.cancelText || 'CANCEL')
+                .on('click', cancel);
+
+            const $ok = $('<button class="cmodal-btn cmodal-confirm"></button>')
+                .text(options.okText || 'OK')
+                .on('click', submit);
+
+            // 엔터로 확인
+            $input.on('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); submit(); }
+            });
+
+            $footer.append($cancel).append($ok);
+            open();
+            $input.focus();
+        });
+    }
+
     // 문자열로 부르면 {message: ...}로, 객체면 그대로
     function normalize(arg) {
         if (typeof arg === 'string') {
@@ -118,5 +168,5 @@ const Modal = (function () {
         return arg || {};
     }
 
-    return { alert, confirm };
+    return { alert, confirm , prompt};
 })();
