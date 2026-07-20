@@ -52,6 +52,10 @@
                         <span class="toggle-text">EXCLUDE</span>
                     </button>
                 </div>
+                <div class="field thCname" style="display: none">
+                    <label for="custname">CUSTOMER</label>
+                    <input type="text" id="custname">
+                </div>
             </div>
 
             <!-- SEARCH 버튼 -->
@@ -68,7 +72,7 @@
                     </div>
 
                     <!-- PT 전용: 기본 숨김 -->
-                    <div class="field-v pt-only" id="ptExtraWrap" style="display:none;">
+                    <div class="field-v" id="ptExtraWrap" style="display:none;">
                         <label class="label-accent">LABEL TYPE</label>
                         <select id="ptExtra">
                             <!-- 동적으로 추가 -->
@@ -134,6 +138,7 @@
                 <thead>
                     <tr>
                         <th class="col-no">NO</th>
+                        <th class="col-cname thCname" style="display:none;">CUSTOMER</th>
                         <th class="col-itemtype">ITEM TYPE</th>
                         <th class="col-car">CAR</th>
                         <th class="col-code">ITEM CODE</th>

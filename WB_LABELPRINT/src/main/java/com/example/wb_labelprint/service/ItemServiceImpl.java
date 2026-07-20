@@ -134,7 +134,7 @@ public class ItemServiceImpl implements ItemService {
             // 한국
             else if ("PT".equals(dbType)) {
                 barcode = switch (labelType) {
-                    case "CART_OUT", "CART_IN", "CART_SMALL"
+                    case "CART_OUT", "CART_IN", "CART_SMALL", "CUST"
                             -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
                     case "HEADREST"
                             -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + String.format("%07d", currentLot)
@@ -146,10 +146,13 @@ public class ItemServiceImpl implements ItemService {
             // 평택의 경우
             String lotno = "";
             if ("PT".equals(dbType)) {
+                // 대차라벨일 경우 lot가 다름.
                 if (labelType.contains("CART")) {
                     lotno = "P" + yymmdd + String.format("%05d", currentLot);
                 } else if ("HEADREST".equals(labelType)){
                     lotno = String.format("%07d", currentLot);
+                } else {
+                    lotno = "P" + yymmdd + String.format("%05d", currentLot);
                 }
             } else {
                 lotno = String.valueOf(currentLot);

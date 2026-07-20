@@ -10,6 +10,7 @@ public class ItemVO {
     private String itemname;
     private String unit;
     private String custcode;
+    private String custname;
     private String car;
     private String scrap;
     private String deldate;

@@ -502,6 +502,10 @@ body {
     font-size: 13px;
 }
 
+.data-table .col-cname {
+    width: 150px;
+}
+
 .data-table .col-itemtype {
     width: 125px;
 }

@@ -136,16 +136,18 @@ public class ItemController {
 
     private String resolvePartTemplate(String labelType) {
         return switch (labelType) {
-            case "CART_OUT" -> "C:/reportILPS/WB_Label_Cart_out.jrxml";   // 대차 (출고 일반)
-            case "CART_IN" -> "C:/reportILPS/WB_Label_Cart_in.jrxml";   // 대차 (내부 일반)
+            case "CUST"       -> "C:/reportILPS/WB_Label_Cust.jrxml";   // 대차 (출고 일반)
+            case "CART_OUT"   -> "C:/reportILPS/WB_Label_Cart_out.jrxml";   // 대차 (출고 일반)
+            case "CART_IN"    -> "C:/reportILPS/WB_Label_Cart_in.jrxml";   // 대차 (내부 일반)
             case "CART_SMALL" -> "C:/reportILPS/WB_Label_Cart_small.jrxml";   // 대차 (내부 소형)
-            case "HEADREST" -> "C:/reportILPS/WB_Label_Headrest.jrxml";   // 부품 파트
+            case "HEADREST"   -> "C:/reportILPS/WB_Label_Headrest.jrxml";   // 부품 파트
             default -> "C:/reportILPS/WB_Label_10x8.jrxml";   // WMS 파트, 기본 파트
         };
     }
 
     private String resolveA4Template(String labelType) {
         return switch (labelType) {
+            case "CUST"       -> "C:/reportILPS/WB_Label_A4_Cust.jrxml";
             case "CART_OUT"   -> "C:/reportILPS/WB_Label_A4_Cart_out.jrxml";
             case "CART_IN"    -> "C:/reportILPS/WB_Label_A4_Cart_in.jrxml";
             case "CART_SMALL" -> "C:/reportILPS/WB_Label_A4_Cart_small.jrxml";

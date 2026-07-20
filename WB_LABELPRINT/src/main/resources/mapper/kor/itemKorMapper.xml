@@ -4,21 +4,30 @@
 <mapper namespace="com.example.wb_labelprint.mapper.kor.ItemKorMapper">
     <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
         SELECT
+            F.CU_SANGHO AS CUSTNAME,
             D.SUBNAME AS ITEMTYPE,
             B.SUBNAME AS CAR,
-            ITEMCODE,
-            SPEC,
-            ITEMNAME,
+            A.ITEMCODE,
+            A.SPEC,
+            A.ITEMNAME,
             C.SUBNAME AS UNIT,
-            DELDATE
+            A.DELDATE
         FROM T_MI_ITEM A
         INNER JOIN T_MI_TYPESUB B ON A.CARNO = B.SUBCODE AND B.TYPECODE = 'MI041'
         LEFT JOIN T_MI_TYPESUB C ON A.CMB_UNIT = C.SUBCODE AND C.TYPECODE = 'MI001'
         LEFT JOIN T_MI_TYPESUB D ON A.CMB_ITEMTYPE = D.SUBCODE AND D.TYPECODE = 'MI002'
+        LEFT JOIN  (
+            SELECT
+                ITEMCODE,
+                MAX(CUSTCODE) KEEP (DENSE_RANK FIRST ORDER BY CONDATE DESC) AS CUSTCODE
+            FROM T_MI_PRICE_BUYCUST
+            GROUP BY ITEMCODE
+        ) E ON A.ITEMCODE = E.ITEMCODE
+        LEFT JOIN C_CUST F ON F.CU_CODE = E.CUSTCODE
         WHERE 1 = 1
         AND A.BRANCH = '001'    -- 울산 고정 (추후 수정 예정)
         <if test="scrap != null and scrap == 'false'">
-            AND DELDATE = ' '
+            AND A.DELDATE = ' '
         </if>
         <if test="itemtype != null and itemtype != ''">
             AND UPPER(D.SUBNAME) LIKE '%' || UPPER(#{itemtype}) || '%'
@@ -27,15 +36,18 @@
             AND UPPER(B.SUBNAME) LIKE '%' || UPPER(#{car}) || '%'
         </if>
         <if test="itemcode != null and itemcode != ''">
-            AND UPPER(ITEMCODE) LIKE '%' || UPPER(#{itemcode}) || '%'
+            AND UPPER(A.ITEMCODE) LIKE '%' || UPPER(#{itemcode}) || '%'
         </if>
         <if test="spec != null and spec != ''">
-            AND UPPER(SPEC) LIKE '%' || UPPER(#{spec}) || '%'
+            AND UPPER(A.SPEC) LIKE '%' || UPPER(#{spec}) || '%'
         </if>
         <if test="itemname != null and itemname != ''">
-            AND UPPER(ITEMNAME) LIKE '%' || UPPER(#{itemname}) || '%'
+            AND UPPER(A.ITEMNAME) LIKE '%' || UPPER(#{itemname}) || '%'
         </if>
-        ORDER BY ITEMCODE
+        <if test="custname != null and custname != ''">
+            AND UPPER(F.CU_SANGHO) LIKE '%' || UPPER(#{custname}) || '%'
+        </if>
+        ORDER BY A.ITEMCODE
     </select>
 
     <select id="getNextLotNo" resultType="string">

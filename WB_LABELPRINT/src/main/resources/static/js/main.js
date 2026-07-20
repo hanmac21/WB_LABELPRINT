@@ -36,9 +36,6 @@ function init() {
     $('#lotDate').val(getTodayString());
     //$('#lotDate').attr('min', getTodayString());   // 오늘 이전 날짜 선택 불가
 
-    // 페이지 진입 시 자동 검색
-    search();
-
     // 초기 TOTAL QTY 계산
     updateTotalQty();
 
@@ -63,7 +60,7 @@ function bindEvents() {
     $('#btnSearch').on('click', search);
 
     // 엔터키 검색
-    $('#itemtype, #car, #itemcode, #spec, #itemname').on('keydown', function (e) {
+    $('#itemtype, #car, #itemcode, #spec, #itemname, #custname').on('keydown', function (e) {
         if (e.key === 'Enter') {
             search();
         }
@@ -138,10 +135,16 @@ function loadCurrentCountry() {
             updateGuideHighlight();                       // 포맷 반영
 
             setupCountryExtras(country);   // ← PT 전용 영역 처리
+
+            // 자동 검색
+            search();
         },
         error: function () {
             $('#dbName').text('-');
             guideFormats = buildGuideFormats('USA');
+            updateGuideHighlight();
+            setupCountryExtras('');   // 헤더/PT영역 숨김
+            search();
         }
     });
 }
@@ -177,7 +180,8 @@ function search() {
         itemcode: $('#itemcode').val().trim(),
         spec: $('#spec').val().trim(),
         itemname: $('#itemname').val().trim(),
-        scrap: $('#scrapToggle').attr('aria-pressed') === 'true'
+        scrap: $('#scrapToggle').attr('aria-pressed') === 'true',
+        custname: $('#custname').val().trim()
     };
 
     showLoading();
@@ -204,8 +208,10 @@ function renderTable(items) {
     const $tbody = $('#itemTableBody');
     $tbody.empty();
 
+    const isPT = currentCountry === 'PT';
+
     if (!items || items.length === 0) {
-        $tbody.append(`<tr><td colspan="6" class="empty-row">No data found</td></tr>`);
+        $tbody.append(`<tr><td colspan="${isPT ? 8 : 7}" class="empty-row">No data found</td></tr>`);
         return;
     }
 
@@ -213,9 +219,12 @@ function renderTable(items) {
         // 폐기 여부
         const isDeleted = item.deldate != null && String(item.deldate).trim() !== '';
 
+        const cnamePT = isPT ? `<td class="col-cname">${escapeHtml(item.custname)}</td>` : '';
+
         const rowHtml = `
         <tr class="${isDeleted ? 'row-deleted' : ''}">
             <td class="col-no">${(index + 1).toLocaleString()}</td>
+            ${cnamePT}
             <td class="col-itemtype">${escapeHtml(item.itemtype)}</td>
             <td class="col-car">${escapeHtml(item.car)}</td>
             <td class="col-itemcode">${escapeHtml(item.itemcode)}</td>
@@ -319,6 +328,7 @@ let labelTypeFormats = null;
 // LABEL TYPE(PT)별 양식 — 실제 규칙으로 교체
 function buildLabelTypeFormats() {
     return {
+        CUST: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 협력사용 부품 식별표
         CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
         CART_SMALL: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
@@ -334,17 +344,20 @@ function setupCountryExtras(country) {
     if (country === 'PT') {
         $ptExtra.empty()
             .append($('<option>').val('').text('선택'))
+            .append($('<option>').val('CUST').text('협력사용 부품식별표'))
             .append($('<option>').val('CART_OUT').text('대차(출고 일반)'))
             .append($('<option>').val('CART_IN').text('대차(내부 일반)'))
             .append($('<option>').val('CART_SMALL').text('대차(내부 소형)'))
             .append($('<option>').val('HEADREST').text('부품'))
         $wrap.show();
+        $('.thCname').show();
 
         labelTypeFormats = buildLabelTypeFormats();   // ← 양식 준비
         updateLabelTypeExample();                     // ← 초기 표시
     } else {
         $wrap.hide();
         $ptExtra.empty();
+        $('.thCname').hide();
     }
 }
 
