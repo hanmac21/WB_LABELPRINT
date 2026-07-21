@@ -116,6 +116,7 @@ public class ItemServiceImpl implements ItemService {
         String car = param.getCar();
         String loginid = param.getLoginid();
         String worker = param.getWorker();
+        String indate = param.getIndate();
 
         // 00001 => 1
         int startLot = Integer.parseInt(param.getLotno());
@@ -172,6 +173,7 @@ public class ItemServiceImpl implements ItemService {
             map.put("lotno", lotno);
             map.put("spec", spec);
             map.put("loginid", worker == null ? loginid : worker);
+            map.put("indate", indate);
 
             mapper.insertBarcode(map);
             barcodeList.add(barcode);

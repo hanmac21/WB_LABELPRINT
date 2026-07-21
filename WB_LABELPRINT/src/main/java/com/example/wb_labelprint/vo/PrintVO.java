@@ -31,6 +31,9 @@ public class PrintVO {
     // 작업자
     private String worker;
 
+    // 납품일자
+    private String indate;
+
     // 라벨 출력 시 전달되는 바코드 리스트
     private List<String> barcodes;
 }

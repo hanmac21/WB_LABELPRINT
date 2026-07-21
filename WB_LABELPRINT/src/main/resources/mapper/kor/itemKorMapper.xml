@@ -77,7 +77,7 @@
         ) VALUES (
             #{barcode},
             'WMS',
-            #{sdate},
+            #{indate},
             #{sdate},
             #{lotno},
             #{itemcode},

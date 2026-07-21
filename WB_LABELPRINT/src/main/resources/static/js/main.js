@@ -522,6 +522,26 @@ async function print() {
         }
     }
 
+    // CUST이면 생산일자 입력 모달 (취소=중단, 빈값=재입력)
+    let indate = '';
+    if ($('#ptExtra').val() === 'CUST') {
+        while (true) {
+            const input = await Modal.prompt({
+                title: 'SELECT DELIVERY DATE',
+                message: 'Please select the delivery date.',
+                type: 'date',                 // ← 날짜 선택기
+                value: getTodayString(),   // ← 오늘 날짜 기본값 (쿠키 저장 안 함)
+                okText: 'NEXT',
+                cancelText: 'CANCEL'
+            });
+
+            if (input === null) return;      // 취소 → 발행 중단
+            indate = input.trim();
+            if (indate) break;
+            await Modal.alert('Delivery date is required.');
+        }
+    }
+
     if (!$('#supplier').val()){
         Modal.alert('Please select a supplier.');
         return;
@@ -552,6 +572,9 @@ async function print() {
 
         // 대차(내부 일반) 일 경우 작업자 추가
         worker:    worker,
+
+        // 협력사용 부품식별표(CUST) 일 경우 생산일자 추가
+        indate:    indate,
     };
 
     // SPEC에 한글 포함 시 중단
@@ -580,6 +603,11 @@ async function print() {
     // CART_IN이면 WORKER도 표에 추가
     if (printData.labelType === 'CART_IN') {
         data.push(['WORKER', printData.worker]);
+    }
+
+    // CUST이면 INDATE도 표에 추가
+    if (printData.labelType === 'CUST') {
+        data.push(['DELIVERY DATE', printData.indate]);
     }
 
     data.push(['GUIDE', printData.guide]);

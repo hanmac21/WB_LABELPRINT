@@ -124,7 +124,8 @@ const Modal = (function () {
             if (options.message) {
                 $body.append($('<p class="cmodal-prompt-msg"></p>').text(options.message));
             }
-            const $input = $('<input type="text" class="cmodal-input">')
+            const $input = $('<input class="cmodal-input">')
+                .attr('type', options.type || 'text')
                 .attr('placeholder', options.placeholder || '')
                 .val(options.value || '');
             $body.append($input);
