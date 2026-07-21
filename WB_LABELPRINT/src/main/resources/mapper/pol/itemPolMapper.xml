@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.wb_labelprint.mapper.pol.ItemPolMapper">
+    <select id="search" resultType="com.example.wb_labelprint.vo.ItemVO">
+        SELECT
+            D.SUBNAME_CH AS ITEMTYPE,
+            B.SUBNAME_CH AS CAR,
+            ITEMCODE,
+            SPEC,
+            ITEMNAME,
+            C.SUBNAME_CH AS UNIT,
+            DELDATE
+        FROM T_MI_ITEM A
+        INNER JOIN T_MI_TYPESUB B ON A.CARNO = B.SUBCODE AND B.TYPECODE = 'MI041'
+        LEFT JOIN T_MI_TYPESUB C ON A.CMB_UNIT = C.SUBCODE AND C.TYPECODE = 'MI001'
+        LEFT JOIN T_MI_TYPESUB D ON A.CMB_ITEMTYPE = D.SUBCODE AND D.TYPECODE = 'MI002'
+        WHERE 1 = 1
+        <if test="scrap != null and scrap == 'false'">
+            AND DELDATE = ' '
+        </if>
+        <if test="itemtype != null and itemtype != ''">
+            AND UPPER(D.SUBNAME) LIKE '%' || UPPER(#{itemtype}) || '%'
+        </if>
+        <if test="car != null and car != ''">
+            AND UPPER(B.SUBNAME) LIKE '%' || UPPER(#{car}) || '%'
+        </if>
+        <if test="itemcode != null and itemcode != ''">
+            AND UPPER(ITEMCODE) LIKE '%' || UPPER(#{itemcode}) || '%'
+        </if>
+        <if test="spec != null and spec != ''">
+            AND UPPER(SPEC) LIKE '%' || UPPER(#{spec}) || '%'
+        </if>
+        <if test="itemname != null and itemname != ''">
+            AND UPPER(ITEMNAME) LIKE '%' || UPPER(#{itemname}) || '%'
+        </if>
+        ORDER BY ITEMCODE
+    </select>
+
+    <select id="getNextLotNo" resultType="string">
+        SELECT BARCODE
+        FROM T_SCM_BARCODE_MAX
+        WHERE SDATE = #{date}
+        AND ITEMCODE = #{itemcode}
+    </select>
+
+
+    <insert id="insertBarcode" parameterType="map">
+        INSERT INTO T_SCM_BARCODE (
+            BARCODE,
+            KIND,
+            INDATE,
+            MADATE,
+            LOTNO,
+            PNO,
+            PNAME,
+            QTY,
+            TOTALQTY,
+            USEYN,
+            LABELTYPE,
+            CNAME,
+            CNO,
+            LOGINID
+        ) VALUES (
+            #{barcode},
+            'WMS',
+            #{sdate},
+            #{sdate},
+            #{lotno},
+            #{itemcode},
+            #{itemname},
+            #{qty},
+            #{totalqty},
+            'Y',
+            'EXCEPTIONIN',
+            #{custname},
+            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname}),
+            #{loginid}
+        )
+    </insert>
+
+    <update id="mergeBarcodeMax">
+        -- T_SCM_BARCODE_MAX 테이블에 ITEMCODE, SDATE가 매칭되는게 있으면 BARCODE(LOTNO)만 업데이트
+        -- 매칭되는게 없다면 INSERT
+        MERGE INTO T_SCM_BARCODE_MAX A
+        USING (
+            SELECT
+                #{itemcode} AS ITEMCODE,
+                #{sdate} AS SDATE,
+                #{lotno} AS LOTNO
+            FROM DUAL
+        )B
+        ON (
+            A.PNO = B.ITEMCODE
+            AND A.MADATE = B.SDATE
+        )
+        WHEN MATCHED THEN
+            UPDATE
+            SET A.BARCODE = B.LOTNO
+        WHEN NOT MATCHED THEN
+            INSERT (
+                PNO,
+                MADATE,
+                BARCODE
+            ) VALUES (
+                B.ITEMCODE,
+                B.SDATE,
+                B.LOTNO
+            )
+    </update>
+
+    <!-- 해당 날짜에 있는 최신 팔레트 바코드 가져오기 -->
+    <select id="selectPalletSeq" resultType="string">
+        SELECT PBARCODE
+        FROM T_SCM_PALLET
+        WHERE SDATE = #{date}
+        ORDER BY PBARCODE DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <insert id="insertPalletBarcode">
+        INSERT INTO T_SCM_PALLET (
+        PBARCODE,
+        SDATE,
+        BBARCODE,
+        YMDHMS,
+        LOGINID,
+        ITEMCODE,
+        CUSTCODE,
+        CUSTNAME,
+        BDATE,
+        SEQ,
+        QTY,
+        SCMMEX,
+        LABELTYPE,
+        LASTSTATUS,
+        LASTFACTORY,
+        FACTORY,
+        LASTQTY
+        ) VALUES (
+        #{pbarcode},
+        #{sdate},
+        #{barcode},
+        TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
+        #{loginid},
+        #{itemcode},
+        #{custcode},
+        #{custname},
+        #{bdate},
+        #{seq},
+        #{qty},
+        #{scmmex},
+        #{labelType},
+        #{laststatus},
+        #{factory},
+        #{factory},
+        #{qty}
+        )
+    </insert>
+
+</mapper>

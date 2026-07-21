@@ -4,5 +4,6 @@ package com.example.wb_labelprint.config.datasource;
 public enum DbType {
     USA,
     MEX,
+    POL,
     PT
 }

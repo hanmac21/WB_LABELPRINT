@@ -34,6 +34,13 @@ public class DataSourceConfig {
         return DataSourceBuilder.create().build();
     }
     
+    // POL DB
+    @Bean(name = "polDataSource")
+    @ConfigurationProperties(prefix = "datasource.pol")
+    public DataSource polDataSource(){
+        return DataSourceBuilder.create().build();
+    }
+
     // KOR(PT) DB
     @Bean(name = "korDataSource")
     @ConfigurationProperties(prefix = "datasource.kor")
@@ -50,6 +57,7 @@ public class DataSourceConfig {
         Map<Object, Object> targetDataSources = new HashMap<>();
         targetDataSources.put(DbType.USA, usaDataSource());
         targetDataSources.put(DbType.MEX, mexDataSource());
+        targetDataSources.put(DbType.POL, polDataSource());
         targetDataSources.put(DbType.PT, korDataSource());
 
         routingDataSource.setTargetDataSources(targetDataSources);

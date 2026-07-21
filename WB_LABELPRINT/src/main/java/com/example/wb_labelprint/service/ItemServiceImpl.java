@@ -5,6 +5,7 @@ import com.example.wb_labelprint.config.datasource.DbType;
 import com.example.wb_labelprint.mapper.ItemMapper;
 import com.example.wb_labelprint.mapper.kor.ItemKorMapper;
 import com.example.wb_labelprint.mapper.mex.ItemMexMapper;
+import com.example.wb_labelprint.mapper.pol.ItemPolMapper;
 import com.example.wb_labelprint.mapper.usa.ItemUsaMapper;
 import com.example.wb_labelprint.vo.ItemVO;
 import com.example.wb_labelprint.vo.PrintVO;
@@ -20,10 +21,11 @@ public class ItemServiceImpl implements ItemService {
 
     private final Map<DbType, ItemMapper> mapperRegistry;
 
-    public ItemServiceImpl(ItemUsaMapper usaMapper, ItemMexMapper mexMapper, ItemKorMapper korMapper) {
+    public ItemServiceImpl(ItemUsaMapper usaMapper, ItemMexMapper mexMapper, ItemPolMapper polMapper, ItemKorMapper korMapper) {
         this.mapperRegistry = Map.of(
                 DbType.USA, usaMapper,
                 DbType.MEX, mexMapper,
+                DbType.POL, polMapper,
                 DbType.PT, korMapper
         );
     }
