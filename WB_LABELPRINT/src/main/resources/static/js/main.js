@@ -328,10 +328,10 @@ let labelTypeFormats = null;
 // LABEL TYPE(PT)별 양식 — 실제 규칙으로 교체
 function buildLabelTypeFormats() {
     return {
-        CUST: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 협력사용 부품 식별표
-        CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
-        CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
-        CART_SMALL: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,        // 대차
+        CUST: `CAR,ITEMCODE,LOTNO,LOTQTY,WBT`,                          // 협력사용 부품 식별표
+        CART_OUT: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,         // 대차
+        CART_IN: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,          // 대차
+        CART_SMALL: `CAR,CUSTOMERCODE,ITEMCODE,LOTQTY,LOTNO,WBT`,       // 대차
         HEADREST: `HKMC 2D 바코드 - 업체코드, 품번, 추적코드`
     };
 }
@@ -578,7 +578,7 @@ async function print() {
     };
 
     // SPEC에 한글 포함 시 중단
-    if (/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(printData.spec)) {
+    if (!printData.labelType.includes("CUST") && /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(printData.spec)) {
         Modal.alert('고객사 품번에 한글이 포함되어 바코드 생성이 불가능합니다.');
         return;
     }

@@ -164,7 +164,7 @@ public class ItemServiceImpl implements ItemService {
                         -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + lotno
                         + "\u001DM" + "N" + "\u001DC" + "W0001"  + "\u001D" + "\u001E" + "\u0004";
                 case "CUST"
-                        -> String.join(",", param.getCar(), param.getItemcode(), lotno, "WBT");
+                        -> String.join(",", param.getCar(), param.getItemcode(), lotno, String.valueOf(lotQty), "WBT");
                 default -> "";
             };
             default -> "";
@@ -185,7 +185,7 @@ public class ItemServiceImpl implements ItemService {
         map.put("lotno", lotno);
         map.put("spec", param.getSpec());
         map.put("loginid", param.getWorker() == null ? param.getLoginid() : param.getWorker());
-        map.put("indate", param.getIndate());
+        map.put("indate", param.getIndate() == null || param.getIndate().isEmpty() ? date : param.getIndate());
         return map;
     }
 
