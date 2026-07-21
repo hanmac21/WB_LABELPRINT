@@ -102,87 +102,26 @@ public class ItemServiceImpl implements ItemService {
 
         // 날짜 추출
         String date = param.getLotDate();
-        String[] dateParts = date.split("-");
-        String year = dateParts[0];
-        String month = dateParts[1];
-        String day = dateParts[2];
         String yymmdd = date.replace("-", "").substring(2);
-
-        int printQty = param.getPrintQty();
-        int lotQty = param.getLotQty();
-        String itemcode = param.getItemcode();
-        String spec = param.getSpec();
-        String labelType = param.getLabelType();
-        String car = param.getCar();
-        String loginid = param.getLoginid();
-        String worker = param.getWorker();
-        String indate = param.getIndate();
 
         // 00001 => 1
         int startLot = Integer.parseInt(param.getLotno());
         int currentLot = 0;
 
-        for (int i = 0; i < printQty; i++){
+        for (int i = 0; i < param.getPrintQty(); i++){
             currentLot = startLot + i;
 
-            String barcode = "";
-            // 미국
-            if ("USA".equals(dbType)) {
-                barcode = String.join("_", day, month, year, spec, String.valueOf(lotQty), String.valueOf(currentLot));
-            }
-            // 멕시코
-            else if ("MEX".equals(dbType)) {
-                barcode = String.join(",", itemcode, yymmdd, String.format("%05d", currentLot), String.format("%08.2f", (double)lotQty), "WMSMEX");
-            }
-            // 한국
-            else if ("PT".equals(dbType)) {
-                barcode = switch (labelType) {
-                    case "CART_OUT", "CART_IN", "CART_SMALL", "CUST"
-                            -> String.join(",", car, spec, itemcode, String.format("%05d", lotQty), "P" + yymmdd + String.format("%05d", currentLot), "WBT");
-                    case "HEADREST"
-                            -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + String.format("%07d", currentLot)
-                                + "\u001DM" + "N" + "\u001DC" + "W0001"  + "\u001D" + "\u001E" + "\u0004";
-                    default -> barcode;
-                };
-            }
+            String lotno   = buildLotno(dbType, param.getLabelType(), date, yymmdd, currentLot);
+            String barcode = buildBarcode(dbType, param, yymmdd, lotno);
 
-            // 평택의 경우
-            String lotno = "";
-            if ("PT".equals(dbType)) {
-                // 대차라벨일 경우 lot가 다름.
-                if (labelType.contains("CART")) {
-                    lotno = "P" + yymmdd + String.format("%05d", currentLot);
-                } else if ("HEADREST".equals(labelType)){
-                    lotno = String.format("%07d", currentLot);
-                } else {
-                    lotno = "P" + yymmdd + String.format("%05d", currentLot);
-                }
-            } else {
-                lotno = String.valueOf(currentLot);
-            }
-
-            Map<String, Object> map = new HashMap<>();
-            map.put("barcode", barcode);
-            map.put("sdate", date);
-            map.put("itemcode", itemcode);
-            map.put("itemname", param.getItemname());
-            map.put("qty", lotQty);
-            map.put("totalqty", param.getTotalQty());
-            map.put("factory", "WBTA");
-            map.put("custname", param.getSupplier());
-            map.put("lotno", lotno);
-            map.put("spec", spec);
-            map.put("loginid", worker == null ? loginid : worker);
-            map.put("indate", indate);
-
-            mapper.insertBarcode(map);
+            mapper.insertBarcode(toBarcodeMap(param, date, barcode, lotno));
             barcodeList.add(barcode);
         }
 
         // t_scm_barcode_max 값 업데이트
         System.out.println(currentLot);
         Map<String, Object> itemInfo = new HashMap<>();
-        itemInfo.put("itemcode", itemcode);
+        itemInfo.put("itemcode", param.getItemcode());
         itemInfo.put("lotno", currentLot);
         itemInfo.put("sdate", param.getLotDate());
 
@@ -191,6 +130,64 @@ public class ItemServiceImpl implements ItemService {
         return barcodeList;
     }
 
+    // LOTNO 생성 로직
+    private String buildLotno(String dbType, String labelType, String date, String yymmdd, int currentLot) {
+        return switch (dbType) {
+            case "USA" -> String.valueOf(currentLot);
+            case "MEX" -> String.format("%05d", currentLot);
+            case "PT"  -> switch (labelType) {
+                case "HEADREST" -> String.format("%07d", currentLot);
+                case "CUST"     -> date.replace("-", "") + String.format("%05d", currentLot);
+                case "CART_IN", "CART_OUT", "CART_SMALL"
+                                -> "P" + yymmdd + String.format("%05d", currentLot);
+                default         -> String.valueOf(currentLot);
+            };
+            default -> "";
+        };
+    }
+
+    // 바코드 생성 로직
+    private String buildBarcode(String dbType, PrintVO param, String yymmdd, String lotno) {
+        String spec   = param.getSpec();
+        int    lotQty = param.getLotQty();
+
+        return switch (dbType) {
+            case "USA" -> {
+                String[] date = param.getLotDate().split("-");
+                yield String.join("_", date[2], date[1], date[0], spec, String.valueOf(lotQty), lotno);
+            }
+            case "MEX" -> String.join(",", param.getItemcode(), yymmdd, lotno, String.format("%08.2f", (double) lotQty), "WMSMEX");
+            case "PT" -> switch (param.getLabelType()) {
+                case "CART_OUT", "CART_IN", "CART_SMALL"
+                        -> String.join(",", param.getCar(), spec, param.getItemcode(), String.format("%05d", lotQty), lotno, "WBT");
+                case "HEADREST"
+                        -> "[)>\u001E06" + "\u001DV" + "SLBJ" + "\u001DP" + spec + "\u001DS" + "\u001DE"+ "\u001DT" + yymmdd + "LX31" + "A" + lotno
+                        + "\u001DM" + "N" + "\u001DC" + "W0001"  + "\u001D" + "\u001E" + "\u0004";
+                case "CUST"
+                        -> String.join(",", param.getCar(), param.getItemcode(), lotno, "WBT");
+                default -> "";
+            };
+            default -> "";
+        };
+    }
+
+    // 바코드 생성용 map
+    private Map<String, Object> toBarcodeMap(PrintVO param, String date, String barcode, String lotno) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("barcode", barcode);
+        map.put("sdate", date);
+        map.put("itemcode", param.getItemcode());
+        map.put("itemname", param.getItemname());
+        map.put("qty", param.getLotQty());
+        map.put("totalqty", param.getTotalQty());
+        map.put("factory", "WBTA");
+        map.put("custname", param.getSupplier());
+        map.put("lotno", lotno);
+        map.put("spec", param.getSpec());
+        map.put("loginid", param.getWorker() == null ? param.getLoginid() : param.getWorker());
+        map.put("indate", param.getIndate());
+        return map;
+    }
 
     // PALLET : 팔레트 라벨 생성
     private List<String> createPallet(PrintVO param, ItemMapper mapper, List<String> partBarcodes) {

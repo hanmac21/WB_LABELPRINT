@@ -31,7 +31,9 @@ public class ItemController {
     }
 
     @PostMapping("/items/search")
-    public List<ItemVO> search(@RequestBody ItemVO itemVO){
+    public List<ItemVO> search(@RequestBody ItemVO itemVO, HttpSession session) {
+        Object custcode = session.getAttribute("custcode");
+        itemVO.setCustcode(custcode != null ? custcode.toString() : null);
         return itemService.search(itemVO);
     }
 

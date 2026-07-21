@@ -26,6 +26,9 @@
         LEFT JOIN C_CUST F ON F.CU_CODE = E.CUSTCODE
         WHERE 1 = 1
         AND A.BRANCH = '001'    -- 울산 고정 (추후 수정 예정)
+        <if test="custcode != null and custcode != ''">
+            AND E.CUSTCODE = #{custcode}
+        </if>
         <if test="scrap != null and scrap == 'false'">
             AND A.DELDATE = ' '
         </if>

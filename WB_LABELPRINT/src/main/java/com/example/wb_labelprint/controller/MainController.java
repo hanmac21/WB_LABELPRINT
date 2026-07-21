@@ -1,6 +1,11 @@
 package com.example.wb_labelprint.controller;
 
+import com.example.wb_labelprint.config.datasource.DbContextHolder;
+import com.example.wb_labelprint.config.datasource.DbType;
+import com.example.wb_labelprint.mapper.LoginMapper;
+import com.example.wb_labelprint.mapper.kor.LoginKorMapper;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -9,8 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Map;
+
 @Controller
 public class MainController {
+
+    @Autowired
+    private LoginKorMapper loginMapper;
 
     @GetMapping("/")
     public String root() {
@@ -25,7 +35,25 @@ public class MainController {
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password, @RequestParam String country, HttpSession session) {
-        if ((!"woobo".equals(username) || !"a1234".equals(password)) && (!"master".equals(username) || !"woo#*".equals(password))) {
+        boolean auth = false;
+
+        if(("woobo".equals(username) && "a1234".equals(password)) || ("master".equals(username) && "woo#*".equals(password))) {
+            auth = true;
+            session.removeAttribute("custcode");        // 관리자는 필터 없이 전체 조회
+        } else if ("PT".equals(country)) {
+            try {
+                DbContextHolder.set(DbType.valueOf(country));   // PT → korDataSource
+                Map<String, Object> user = loginMapper.loginCheck(username);
+                auth = (user != null) && password.equals(user.get("PW"));
+                if (auth){
+                    session.setAttribute("custcode", user.get("CUSTCODE"));
+                }
+            } finally {
+                DbContextHolder.clear();   // 반드시 정리 (스레드 재사용 대비)
+            }
+        }
+
+        if (!auth){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.wb_labelprint.mapper.kor.LoginKorMapper">
+    <select id="loginCheck" resultType="map">
+        SELECT
+            A.CU_SANO AS ID,
+            A.CU_CODE AS CUSTCODE,
+            B.CUSTPW AS PW
+        FROM C_CUST A
+        LEFT JOIN T_SCM_CUST B ON B.CUSTCODE = A.CU_CODE
+        WHERE A.CU_SANO = #{username}
+    </select>
+</mapper>
