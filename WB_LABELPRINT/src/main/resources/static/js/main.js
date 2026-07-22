@@ -662,11 +662,18 @@ function doPrint(printData) {
 // 출력 모달 열기
 function openPrintModal(result, printData) {
     const items = [];
-    if (result.part)   items.push({ label: 'PRINT LABEL',   barcodes: result.part,   type: 'part' });
-    // A4는 PT(한국 DB)일 때만
-    if (result.part && currentCountry === 'PT') items.push({ label: 'PRINT A4', barcodes: result.part,   type: 'part',   paper: 'a4'});
-    if (result.pallet) items.push({ label: 'PRINT PALLET LABEL', barcodes: result.pallet, type: 'pallet' });
-    if (result.box)    items.push({ label: 'PRINT BOX LABEL',    barcodes: result.box,    type: 'box' });
+    if (result.part)
+        items.push({ label: 'PRINT LABEL',   barcodes: result.part,   type: 'part' });
+
+    // A4는 PT(한국 DB)일 때만 + 부품 바코드는 제외
+    if (result.part && currentCountry === 'PT' && printData.labelType !== 'HEADREST')
+        items.push({ label: 'PRINT A4', barcodes: result.part,   type: 'part',   paper: 'a4'});
+
+    if (result.pallet)
+        items.push({ label: 'PRINT PALLET LABEL', barcodes: result.pallet, type: 'pallet' });
+
+    if (result.box)
+        items.push({ label: 'PRINT BOX LABEL',    barcodes: result.box,    type: 'box' });
 
     const $buttons = $('#printModalButtons');
     $buttons.empty();
