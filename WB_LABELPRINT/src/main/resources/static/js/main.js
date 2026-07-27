@@ -92,8 +92,9 @@ function bindEvents() {
     });
 
     $('#printQty').on('blur', function () {
-        validateQty($(this), 1, 100);    // 최소 1, 최대 100
+        validateQty($(this), 1, 10000);    // 최소 1, 최대 100
         updateTotalQty();
+        updateQtyLock();
     });
 
     // LOT QTY / PRINT QTY — 음수 부호, 'e' 등 숫자 외 키 차단
@@ -303,6 +304,7 @@ function applyLabelType(labelType) {
         $ptExtra.val('');
     }
     updateLabelTypeExample();
+    updateQtyLock();
 }
 
 // 마감처(CLOSE_CUSTOMER) 반영 — 고정 목록에 포함되면 자동 선택
@@ -310,7 +312,7 @@ function applyCloseCustomer(closeCustomer) {
     const value = (closeCustomer || '').trim();
     const $sel = $('#supplier');
 
-    let matched = '';
+    let matched = '(주)우보테크';
     if (value) {
         $sel.find('option').each(function () {
             const optVal = $(this).val();
@@ -373,6 +375,20 @@ function updateLabelTypeExample() {
     } else {
         $('#ptExample').css('visibility', 'visible').text(formats[selected] || '');
     }
+}
+
+// HEADREST면 LOT QTY 1 고정
+function updateQtyLock() {
+    const isHeadrest = $('#ptExtra').val() === 'HEADREST';
+    const $lotQty = $('#lotQty');
+
+    if (isHeadrest) {
+        $lotQty.val(1).prop('readonly', true).addClass('input-locked');
+    } else {
+        $lotQty.prop('readonly', false).removeClass('input-locked');
+    }
+
+    updateTotalQty();   // TOTAL QTY 재계산
 }
 
 /* =====================================================
@@ -545,6 +561,12 @@ async function print() {
     if (!$('#supplier').val()){
         Modal.alert('Please select a supplier.');
         return;
+    }
+
+    // HEADREST는 LOT QTY 1 고정
+    if ($('#ptExtra').val() === 'HEADREST') {
+        $('#lotQty').val(1);
+        updateTotalQty();
     }
 
     const printData = {

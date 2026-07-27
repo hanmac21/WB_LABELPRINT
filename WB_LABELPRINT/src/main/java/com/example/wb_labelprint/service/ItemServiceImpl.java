@@ -184,7 +184,7 @@ public class ItemServiceImpl implements ItemService {
         map.put("custname", param.getSupplier());
         map.put("lotno", lotno);
         map.put("spec", param.getSpec());
-        map.put("loginid", param.getWorker() == null ? param.getLoginid() : param.getWorker());
+        map.put("loginid", param.getWorker() == null || param.getWorker().isEmpty() ? param.getLoginid() : param.getWorker());
         map.put("indate", param.getIndate() == null || param.getIndate().isEmpty() ? date : param.getIndate());
         return map;
     }

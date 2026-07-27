@@ -236,6 +236,13 @@ body {
     cursor: not-allowed;
 }
 
+/* HEADREST — LOT QTY 1 고정 */
+.input-locked {
+    background: #f1f3f5 !important;
+    color: #868e96;
+    cursor: not-allowed;
+}
+
 .num-input {
     text-align: center;
     font-weight: 700;

@@ -153,7 +153,6 @@ public class ItemController {
             case "CART_OUT"   -> "C:/reportILPS/WB_Label_A4_Cart_out.jrxml";
             case "CART_IN"    -> "C:/reportILPS/WB_Label_A4_Cart_in.jrxml";
             case "CART_SMALL" -> "C:/reportILPS/WB_Label_A4_Cart_small.jrxml";
-            case "HEADREST"   -> "C:/reportILPS/WB_Label_A4_Headrest.jrxml";
             default           -> "C:/reportILPS/WB_Label_A4.jrxml";   // 기본 A4
         };
     }
