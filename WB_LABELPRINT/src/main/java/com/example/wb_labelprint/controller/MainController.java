@@ -37,7 +37,7 @@ public class MainController {
     public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password, @RequestParam String country, HttpSession session) {
         boolean auth = false;
 
-        if(("woobo".equals(username) && "a1234".equals(password)) || ("master".equals(username) && "woo#*".equals(password))) {
+        if(("woobo".equals(username) && "labelwoobo".equals(password)) || ("master".equals(username) && "woo#*".equals(password))) {
             auth = true;
             session.removeAttribute("custcode");        // 관리자는 필터 없이 전체 조회
         } else if ("PT".equals(country)) {
