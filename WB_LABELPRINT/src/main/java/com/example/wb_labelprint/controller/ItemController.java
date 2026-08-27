@@ -54,6 +54,7 @@ public class ItemController {
         return switch (country == null ? "USA" : country) {
             case "MEX" -> List.of("WBMX");
             case "PT"  -> List.of("(주)우보테크", "리어코리아(유)");
+            case "POL" -> List.of("Woobotech");
             default    -> List.of("WBTM");
         };
     }
@@ -67,7 +68,7 @@ public class ItemController {
 
     @GetMapping("/label/print")
     @ResponseBody
-    public void labelPrint(HttpServletResponse response, HttpServletRequest request, @RequestParam Map<String, String> param) {
+    public void labelPrint(HttpServletResponse response, HttpSession session, @RequestParam Map<String, String> param) {
         // 파트 라벨 타입 (대차, 리어, WMS)
         String labelType = param.getOrDefault("labelType", "");
 
@@ -77,6 +78,10 @@ public class ItemController {
         // 용지 종류 (label / a4)
         String paper = param.getOrDefault("paper", "label");
 
+        // 파트라벨 발행을 위해서 DBTYPE 가져오기
+        String country = (String) session.getAttribute("country");
+        if (country == null) country = "USA";
+
         String templatePath;
         if ("a4".equals(paper)) {
             // A4는 labelType별 A4 템플릿
@@ -84,10 +89,10 @@ public class ItemController {
         } else {
             // 기존 라벨 로직 그대로
             switch (guide) {
-                case "pallet": templatePath = "C:/reportILPS/WB_Label_Pallet.jrxml"; break;
+                case "pallet": templatePath = resolvePalletTemplate(country); break;
                 case "box":    templatePath = "C:/reportILPS/WB_Label_Boxlabel.jrxml"; break;
                 case "part":
-                default:       templatePath = resolvePartTemplate(labelType); break;
+                default:       templatePath = resolvePartTemplate(labelType, country); break;
             }
         }
         System.out.println("guide : " + guide + ", templatePath : " + templatePath);
@@ -136,14 +141,17 @@ public class ItemController {
         }
     }
 
-    private String resolvePartTemplate(String labelType) {
+    private String resolvePartTemplate(String labelType, String country) {
         return switch (labelType) {
             case "CUST"       -> "C:/reportILPS/WB_Label_Cust.jrxml";   // 대차 (출고 일반)
             case "CART_OUT"   -> "C:/reportILPS/WB_Label_Cart_out.jrxml";   // 대차 (출고 일반)
             case "CART_IN"    -> "C:/reportILPS/WB_Label_Cart_in.jrxml";   // 대차 (내부 일반)
             case "CART_SMALL" -> "C:/reportILPS/WB_Label_Cart_small.jrxml";   // 대차 (내부 소형)
             case "HEADREST"   -> "C:/reportILPS/WB_Label_Headrest.jrxml";   // 부품 파트
-            default -> "C:/reportILPS/WB_Label_10x8.jrxml";   // WMS 파트, 기본 파트
+            default -> switch (country) {   // WMS 파트, 기본 파트
+                case "POL" -> "C:/reportILPS/WB_Label_10x8_Pol.jrxml";
+                default    -> "C:/reportILPS/WB_Label_10x8.jrxml";   // USA
+            };
         };
     }
 
@@ -154,6 +162,13 @@ public class ItemController {
             case "CART_IN"    -> "C:/reportILPS/WB_Label_A4_Cart_in.jrxml";
             case "CART_SMALL" -> "C:/reportILPS/WB_Label_A4_Cart_small.jrxml";
             default           -> "C:/reportILPS/WB_Label_A4.jrxml";   // 기본 A4
+        };
+    }
+
+    private String resolvePalletTemplate(String country) {
+        return switch (country) {
+            case "POL" -> "C:/reportILPS/WB_Label_Pallet_Pol.jrxml";
+            default    -> "C:/reportILPS/WB_Label_Pallet.jrxml";   // USA
         };
     }
 }

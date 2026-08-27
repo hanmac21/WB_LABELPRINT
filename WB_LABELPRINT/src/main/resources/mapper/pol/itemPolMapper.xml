@@ -59,12 +59,11 @@
             USEYN,
             LABELTYPE,
             CNAME,
-            CNO,
-            LOGINID
+            CNO
         ) VALUES (
             #{barcode},
             'WMS',
-            #{sdate},
+            REPLACE(#{sdate}, '-', ''),
             #{sdate},
             #{lotno},
             #{itemcode},
@@ -74,8 +73,7 @@
             'Y',
             'EXCEPTIONIN',
             #{custname},
-            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname}),
-            #{loginid}
+            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname})
         )
     </insert>
 
@@ -91,16 +89,16 @@
             FROM DUAL
         )B
         ON (
-            A.PNO = B.ITEMCODE
-            AND A.MADATE = B.SDATE
+            A.ITEMCODE = B.ITEMCODE
+            AND A.SDATE = B.SDATE
         )
         WHEN MATCHED THEN
             UPDATE
             SET A.BARCODE = B.LOTNO
         WHEN NOT MATCHED THEN
             INSERT (
-                PNO,
-                MADATE,
+                ITEMCODE,
+                SDATE,
                 BARCODE
             ) VALUES (
                 B.ITEMCODE,
@@ -113,48 +111,48 @@
     <select id="selectPalletSeq" resultType="string">
         SELECT PBARCODE
         FROM T_SCM_PALLET
-        WHERE SDATE = #{date}
+        WHERE MDATE = REPLACE(#{date}, '-', '')
         ORDER BY PBARCODE DESC
         FETCH FIRST 1 ROWS ONLY
     </select>
 
     <insert id="insertPalletBarcode">
         INSERT INTO T_SCM_PALLET (
-        PBARCODE,
-        SDATE,
-        BBARCODE,
-        YMDHMS,
-        LOGINID,
-        ITEMCODE,
-        CUSTCODE,
-        CUSTNAME,
-        BDATE,
-        SEQ,
-        QTY,
-        SCMMEX,
-        LABELTYPE,
-        LASTSTATUS,
-        LASTFACTORY,
-        FACTORY,
-        LASTQTY
+            PBARCODE,
+            MDATE,
+            BBARCODE,
+            YMDHMS,
+            LOGINID,
+            ITEMCODE,
+            CUCODE,
+            CNAME,
+            BDATE,
+            SEQ,
+            QTY,
+            SCMMEX,
+            LABELTYPE,
+            LASTSTATUS,
+            LASTFACTORY,
+            FACTORY,
+            LASTQTY
         ) VALUES (
-        #{pbarcode},
-        #{sdate},
-        #{barcode},
-        TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
-        #{loginid},
-        #{itemcode},
-        #{custcode},
-        #{custname},
-        #{bdate},
-        #{seq},
-        #{qty},
-        #{scmmex},
-        #{labelType},
-        #{laststatus},
-        #{factory},
-        #{factory},
-        #{qty}
+            #{pbarcode},
+            REPLACE(#{sdate}, '-', ''),
+            #{barcode},
+            TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
+            #{loginid},
+            #{itemcode},
+            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname}),
+            #{custname},
+            #{bdate},
+            #{seq},
+            #{qty},
+            #{scmmex},
+            #{labelType},
+            #{laststatus},
+            #{factory},
+            #{factory},
+            #{qty}
         )
     </insert>
 

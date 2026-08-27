@@ -160,7 +160,7 @@
             TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
             #{loginid},
             #{itemcode},
-            #{custcode},
+            (SELECT DISTINCT CU_CODE FROM C_CUST WHERE CU_SANGHO = #{custname}),
             #{custname},
             #{bdate},
             #{seq},

@@ -70,19 +70,20 @@ public class ItemServiceImpl implements ItemService {
         String guide = param.getGuide();
 
         Map<String, List<String>> result = new LinkedHashMap<>();
+        List<String> lotnoList = new ArrayList<>();
 
         switch (guide) {
             case "OFF":
-                result.put("part", createPart(param, mapper));
+                result.put("part", createPart(param, mapper, lotnoList));
                 break;
             case "PALLET": {
-                List<String> partBarcodes = createPart(param, mapper);
+                List<String> partBarcodes = createPart(param, mapper, lotnoList);
                 result.put("part", partBarcodes);
-                result.put("pallet", createPallet(param, mapper, partBarcodes));
+                result.put("pallet", createPallet(param, mapper, partBarcodes, lotnoList));
                 break;
             }
             case "BOX":
-                List<String> partBarcodes = createPart(param, mapper);
+                List<String> partBarcodes = createPart(param, mapper, lotnoList);
                 result.put("part", partBarcodes);
                 result.put("box", partBarcodes);
                 break;
@@ -94,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     // OFF : 파트라벨 생성
-    private List<String> createPart(PrintVO param, ItemMapper mapper) {
+    private List<String> createPart(PrintVO param, ItemMapper mapper, List<String> lotnoList) {
         List<String> barcodeList = new ArrayList<>();
 
         // 접속 DB정보 가져오기
@@ -116,6 +117,7 @@ public class ItemServiceImpl implements ItemService {
 
             mapper.insertBarcode(toBarcodeMap(param, date, barcode, lotno));
             barcodeList.add(barcode);
+            lotnoList.add(lotno);
         }
 
         // t_scm_barcode_max 값 업데이트
@@ -135,6 +137,7 @@ public class ItemServiceImpl implements ItemService {
         return switch (dbType) {
             case "USA" -> String.valueOf(currentLot);
             case "MEX" -> String.format("%05d", currentLot);
+            case "POL" -> String.format("%05d", currentLot);
             case "PT"  -> switch (labelType) {
                 case "HEADREST" -> String.format("%07d", currentLot);
                 case "CUST"     -> date.replace("-", "") + String.format("%05d", currentLot);
@@ -156,6 +159,7 @@ public class ItemServiceImpl implements ItemService {
                 String[] date = param.getLotDate().split("-");
                 yield String.join("_", date[2], date[1], date[0], spec, String.valueOf(lotQty), lotno);
             }
+            case "POL" -> String.join(",", param.getItemcode(), yymmdd, lotno, String.format("%08.2f", (double) lotQty), "WMSPOL");
             case "MEX" -> String.join(",", param.getItemcode(), yymmdd, lotno, String.format("%08.2f", (double) lotQty), "WMSMEX");
             case "PT" -> switch (param.getLabelType()) {
                 case "CART_OUT", "CART_IN", "CART_SMALL"
@@ -190,13 +194,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     // PALLET : 팔레트 라벨 생성
-    private List<String> createPallet(PrintVO param, ItemMapper mapper, List<String> partBarcodes) {
+    private List<String> createPallet(PrintVO param, ItemMapper mapper, List<String> partBarcodes, List<String> lotnoList) {
         String date = param.getLotDate();
         String bdate = date.replace("-", "").substring(2);
         String itemcode = param.getItemcode();
         String custname = param.getSupplier();
         String qty = String.valueOf(param.getLotQty());
         double totalqty = param.getTotalQty();
+
+        String dbType = String.valueOf(DbContextHolder.get());
+        String wms = "WMS" + ("PT".equals(dbType) ? "KOR" : dbType);
 
         String lastPalletBarcode = mapper.selectPalletSeq(date);
         int palletSeq = 0;
@@ -209,13 +216,13 @@ public class ItemServiceImpl implements ItemService {
         }
         palletSeq++;
 
-        String pbarcode = "P" + date.replace("-", "").substring(2)
-                + String.format("%05d", palletSeq) + ","
-                + itemcode + "," + String.format("%08.2f", totalqty) + ",WMSUSA";
+        String pbarcode = "P" + bdate + String.format("%05d", palletSeq) + ","
+                + itemcode + "," + String.format("%08.2f", totalqty) + "," + wms;
 
 
-        for (String barcode : partBarcodes) {   // 넘겨받은 파트라벨 사용
-            String barcodeSeq = barcode.split("_")[5];
+        for (int i = 0; i < partBarcodes.size(); i++) {     // 넘겨받은 파트라벨 사용
+            String barcode    = partBarcodes.get(i);
+            String barcodeSeq = lotnoList.get(i);
 
             Map<String, Object> map = new HashMap<>();
             map.put("pbarcode", pbarcode);
@@ -225,10 +232,10 @@ public class ItemServiceImpl implements ItemService {
             map.put("sdate", date);
             map.put("bdate", bdate);
             map.put("itemcode", itemcode);
-            map.put("custcode", "A021");
+            map.put("custcode", ""); // 쿼리에서 처리 예정
             map.put("custname", custname);
             map.put("qty", qty);
-            map.put("scmmex", "WMSUSA");
+            map.put("scmmex", wms);
             map.put("labelType", "EXCEPTIONIN");
             map.put("factory", "WBTA");
             map.put("laststatus", "1");

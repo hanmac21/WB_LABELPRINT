@@ -467,7 +467,7 @@ function validateQty($input, min, max) {
 
 // 가이드별 바코드 양식 (고정 텍스트 — 실제 값 아님, 생성 형식 안내)
 // country → WMS 접미사
-const WMS_SUFFIX = { USA: 'WMSUSA', PT: 'WMSKOR', MEX: 'WMSMEX' };
+const WMS_SUFFIX = { USA: 'WMSUSA', PT: 'WMSKOR', MEX: 'WMSMEX', POL: 'WMSPOL' };
 
 // country 확정되면 채워짐 (응답 전엔 USA 기준 기본값 사용)
 let guideFormats = null;
