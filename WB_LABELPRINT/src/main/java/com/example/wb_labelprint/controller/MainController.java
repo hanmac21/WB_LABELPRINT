@@ -32,10 +32,18 @@ public class MainController {
         return "forward:/login.html";
     }
 
-    @PostMapping("/login")
-    @ResponseBody
-    public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password, @RequestParam String country, HttpSession session) {
-        boolean auth = false;
+	@PostMapping("/login")
+	@ResponseBody
+	public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password, @RequestParam String country, HttpSession session) {
+
+	// @PostMapping("/login")
+	// @ResponseBody
+	// public ResponseEntity<Void> login(
+	// 		@RequestParam("username") String username,
+	// 		@RequestParam("password") String password,
+	// 		@RequestParam("country") String country,
+	// 		HttpSession session) {
+			boolean auth = false;
 
         if(("woobo".equals(username) && "labelwoobo".equals(password)) || ("master".equals(username) && "woo#*".equals(password))) {
             auth = true;

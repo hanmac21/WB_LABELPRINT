@@ -64,12 +64,19 @@
             <!-- 중앙: 로트 정보 -->
             <div class="lot-area">
                 <div class="lot-row">
-                    <div class="field-v">
-                        <label class="label-accent">SUPPLIER</label>
-                        <select id="supplier">
-                            <!-- 동적으로 추가 -->
-                        </select>
-                    </div>
+					<div class="field-v supplier-wrap">
+						<label class="label-accent">SUPPLIER</label>
+
+						<div class="supplier-combo">
+							<input type="text"
+								id="supplier"
+								autocomplete="off">
+
+							<button type="button" id="supplierToggle">▼</button>
+
+							<div id="supplierDropdown" class="supplier-dropdown"></div>
+						</div>
+					</div>
 
                     <!-- PT 전용: 기본 숨김 -->
                     <div class="field-v" id="ptExtraWrap" style="display:none;">
