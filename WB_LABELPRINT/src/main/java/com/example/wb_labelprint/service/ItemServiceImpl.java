@@ -82,11 +82,12 @@ public class ItemServiceImpl implements ItemService {
                 result.put("pallet", createPallet(param, mapper, partBarcodes, lotnoList));
                 break;
             }
-            case "BOX":
+            case "BOX": {
                 List<String> partBarcodes = createPart(param, mapper, lotnoList);
                 result.put("part", partBarcodes);
-                result.put("box", partBarcodes);
+                result.put("box", createBox(param, mapper, partBarcodes, lotnoList));
                 break;
+            }
             default:
                 throw new IllegalStateException("지원하지 않는 바코드 양식: " + guide);
         }
@@ -250,9 +251,36 @@ public class ItemServiceImpl implements ItemService {
     }
 
     // BOX : 박스 라벨 생성
-    private List<String> createBox(PrintVO param, ItemMapper mapper) {
+    private List<String> createBox(PrintVO param, ItemMapper mapper, List<String> partBarcodes, List<String> lotnoList) {
         List<String> barcodeList = new ArrayList<>();
-        // BOX 전용 로직
-        return barcodeList;
+        String dbType = String.valueOf(DbContextHolder.get());
+
+        // USA는 파트라벨 형식(_ 구분)이 박스라벨과 동일 → 새로 생성하지 않고 그대로 사용
+        if ("USA".equals(dbType)) {
+            return partBarcodes;
+        }
+
+        // MEX / POL / PT : t_scm_barcode 에 박스라벨 형식으로 새로 생성
+        String date = param.getLotDate();
+        String[] ymd = date.split("-");           // [0]=yyyy, [1]=MM, [2]=dd
+        String spec = param.getSpec();
+        int lotQty = param.getLotQty();
+
+        List<String> boxList = new ArrayList<>();
+
+        for (String lotno : lotnoList) {
+            // 숫자만 남기고 뒤 5자리를 순번으로 사용 → P25090400001 → 00001 → 1
+            String digits = lotno.replaceAll("\\D", "");
+            String seq = digits.length() > 5 ? digits.substring(digits.length() - 5) : digits;
+            String lotNoInt = String.valueOf(Integer.parseInt(seq));
+
+            // DD_MM_YYYY_CUSTOMERCODE_LOTQTY_LOTNO
+            String boxBarcode = String.join("_", ymd[2], ymd[1], ymd[0], spec, String.valueOf(lotQty), lotNoInt);
+
+            mapper.insertBarcode(toBarcodeMap(param, date, boxBarcode, lotno));
+            boxList.add(boxBarcode);
+        }
+
+        return boxList;
     }
 }

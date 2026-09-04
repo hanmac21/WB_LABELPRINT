@@ -90,7 +90,7 @@ public class ItemController {
             // 기존 라벨 로직 그대로
             switch (guide) {
                 case "pallet": templatePath = resolvePalletTemplate(country); break;
-                case "box":    templatePath = "C:/reportILPS/WB_Label_Boxlabel.jrxml"; break;
+                case "box":    templatePath = resolveBoxTemplate(country); break;
                 case "part":
                 default:       templatePath = resolvePartTemplate(labelType, country); break;
             }
@@ -169,6 +169,13 @@ public class ItemController {
         return switch (country) {
             case "POL" -> "C:/reportILPS/WB_Label_Pallet_Pol.jrxml";
             default    -> "C:/reportILPS/WB_Label_Pallet.jrxml";   // USA
+        };
+    }
+
+    private String resolveBoxTemplate(String country) {
+        return switch (country) {
+            case "POL" -> "C:/reportILPS/WB_Label_Boxlabel_Pol.jrxml";
+            default    -> "C:/reportILPS/WB_Label_Boxlabel.jrxml";   // USA
         };
     }
 }
