@@ -66,7 +66,7 @@ public class ItemController {
         return result != null ? result : new HashMap<>();
     }
 
-    @GetMapping("/label/print")
+    @PostMapping("/label/print")
     @ResponseBody
     public void labelPrint(HttpServletResponse response, HttpSession session, @RequestParam Map<String, String> param) {
         // 파트 라벨 타입 (대차, 리어, WMS)

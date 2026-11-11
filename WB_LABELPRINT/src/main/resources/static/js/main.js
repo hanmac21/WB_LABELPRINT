@@ -803,15 +803,13 @@ function openPrintModal(result, printData) {
 
 // PDF 새 창에서 열기
 function openLabelPdf(barcodes, printData, type, paper) {
-	const params = new URLSearchParams({
+	const params = {
 		barcodes: barcodes.join(";"),
 		qty: printData.lotQty,
 		labelType: printData.labelType,
 		guide: type,
 		paper: paper || "label", // ← 용지 종류 추가
-	});
-
-	const url = "/label/print?" + params.toString();
+	};
 
 	const width = 900;
 	const height = 800;
@@ -829,7 +827,31 @@ function openLabelPdf(barcodes, printData, type, paper) {
         scrollbars=yes
     `;
 
-	window.open(url, "labelPreview_" + type, features);
+	const windowName = "labelPreview_" + type;
+	const previewWindow = window.open("", windowName, features);
+	if (!previewWindow) {
+		Modal.alert("Please allow pop-ups to preview the label.");
+		return;
+	}
+
+	// 바코드 목록이 길어져도 URL/요청 헤더 크기 제한에 걸리지 않도록 POST body로 전송한다.
+	const form = document.createElement("form");
+	form.method = "POST";
+	form.action = "/label/print";
+	form.target = windowName;
+	form.style.display = "none";
+
+	Object.entries(params).forEach(function ([name, value]) {
+		const input = document.createElement("input");
+		input.type = "hidden";
+		input.name = name;
+		input.value = value;
+		form.appendChild(input);
+	});
+
+	document.body.appendChild(form);
+	form.submit();
+	form.remove();
 }
 
 // 출력 모달 닫기 — 미출력 안내
