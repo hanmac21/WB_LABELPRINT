@@ -55,7 +55,7 @@ public class ItemController {
             case "MEX" -> List.of("WBMX");
             case "PT"  -> List.of("(주)우보테크", "리어코리아(유)");
             case "POL" -> List.of("Woobotech");
-            default    -> List.of("WBTM");
+            default    -> List.of("WBTA");
         };
     }
 
