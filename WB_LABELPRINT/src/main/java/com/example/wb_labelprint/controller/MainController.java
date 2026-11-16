@@ -43,9 +43,19 @@ public class MainController {
 	// 		@RequestParam("password") String password,
 	// 		@RequestParam("country") String country,
 	// 		HttpSession session) {
-			boolean auth = false;
+		boolean auth = false;
 
-        if(("woobo".equals(username) && "labelwoobo".equals(password)) || ("master".equals(username) && "woo#*".equals(password))) {
+		// 계정 3개
+		boolean isDefaultAdmin = !"POL".equals(country)
+				&& "woobo".equals(username)
+				&& "labelwoobo".equals(password);
+		boolean isPolandAdmin = "POL".equals(country)
+				&& "woobo".equals(username)
+				&& "woobolog11".equals(password);
+		boolean isMasterAdmin = "master".equals(username)
+				&& "woo#*".equals(password);
+
+        if (isDefaultAdmin || isPolandAdmin || isMasterAdmin) {
             auth = true;
             session.removeAttribute("custcode");        // 관리자는 필터 없이 전체 조회
         } else if ("PT".equals(country)) {
